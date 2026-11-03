@@ -1,0 +1,716 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import CtaClosing from "../components/CtaClosing.astro";
+import Icon, { type IconName } from "../components/Icon.astro";
+import { roles, departments, applyHref, generalApplicationHref, countryName } from "../data/careers";
+import { COMPANY, EMAIL, SITE_URL } from "../data/site";
+
+const counts = Object.fromEntries(departments.map((d) => [d, roles.filter((r) => r.department === d).length]));
+const reasons: { icon: IconName; title: string; body: string }[] = [
+  {
+    icon: "rocket",
+    title: "Your work ships to real customers",
+    body: "We're a small team, so everything you build goes live quickly. You'll see what your work does for real wholesale businesses within days, not quarters.",
+  },
+  {
+    icon: "globe",
+    title: "Work from anywhere",
+    body: "We're remote-first. Work from wherever you do your best work. We care about output, not office hours.",
+  },
+  {
+    icon: "code",
+    title: "Modern technology",
+    body: "React, TanStack, Supabase, Claude and Cloudflare. We use good tools and keep them current. No legacy codebase to fight with.",
+  },
+  {
+    icon: "trend",
+    title: "Grow with the company",
+    body: "We're early. The people who join now will help shape the product, the culture and the company. There's real upside for the right people.",
+  },
+];
+const stack = [
+  { mark: "R", name: "React + TanStack", note: "Full-stack React with TanStack Router and Start." },
+  { mark: "TS", name: "TypeScript", note: "Strictly typed throughout, with zero type errors enforced." },
+  { mark: "S", name: "Supabase", note: "PostgreSQL with row-level security, auth and real-time." },
+  { mark: "AI", name: "Claude", note: "Anthropic's Claude powers Centra AI." },
+  { mark: "CF", name: "Cloudflare", note: "The app and this website run on Cloudflare Workers." },
+  { mark: "GH", name: "GitHub", note: "Version control and CI/CD." },
+];
+const process = [
+  {
+    title: "Apply",
+    body: "Send us your CV and a short note about why you want to work at Centra One. No cover letter templates: just tell us what excites you.",
+  },
+  {
+    title: "Intro call",
+    body: "A 30-minute video call with the founder. We want to understand your background and what you're looking for.",
+  },
+  {
+    title: "Skills assessment",
+    body: "A practical task relevant to the role. Nothing long or theoretical. We want to see how you actually work.",
+  },
+  {
+    title: "Offer",
+    body: "If it's a good fit on both sides, we move fast. No committee approvals or endless rounds of interviews.",
+  },
+];
+const reveal = ["rv", "rv2", "rv3", "rv3"];
+
+const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const hiringOrganization = {
+  "@type": "Organization",
+  name: COMPANY.legalName,
+  url: SITE_URL,
+  sameAs: SITE_URL,
+  logo: `${SITE_URL}/icon-512.png`,
+};
+const jsonLd = roles.map((role) => ({
+  "@context": "https://schema.org",
+  "@type": "JobPosting",
+  title: role.title,
+  description: `<p>${escapeHtml(role.description)}</p><ul>${role.requirements.map((r) => `<li>${escapeHtml(r)}</li>`).join("")}</ul>`,
+  identifier: { "@type": "PropertyValue", name: COMPANY.legalName, value: role.id },
+  url: `${SITE_URL}/careers#${role.id}`,
+  datePosted: role.posted,
+  employmentType: "FULL_TIME",
+  jobLocationType: "TELECOMMUTE",
+  ...(role.countries.length > 0 && {
+    applicantLocationRequirements: role.countries.map((c) => ({ "@type": "Country", name: countryName(c) })),
+  }),
+  hiringOrganization,
+}));
+---
+
+<BaseLayout
+  title="Careers"
+  description="Remote-first roles at Centra One in engineering, sales, product and support. Help build wholesale software for New Zealand and Australia."
+  jsonLd={jsonLd}
+>
+  <PageHeader
+    eyebrow="Careers"
+    title='Build the software<br><span class="dim">wholesale runs on.</span>'
+    lead="Centra One is a small, ambitious team building wholesale software in New Zealand. We're remote-friendly, we move fast and we care deeply about the product."
+  >
+    <div class="btn-row">
+      <a class="btn btn-primary" href="#open-roles">See open roles</a>
+      <a class="btn btn-secondary" href={generalApplicationHref}>Email the team</a>
+    </div>
+    <div class="chips mt-32">
+      <span class="chip">REMOTE-FIRST</span>
+      <span class="chip">{roles.length} OPEN ROLES</span>
+      <span class="chip">BUILT IN NEW ZEALAND</span>
+    </div>
+  </PageHeader>
+
+  <section class="section-tight why" aria-labelledby="why-title">
+    <div class="container">
+      <p class="eyebrow rv">Why here</p>
+      <h2 id="why-title" class="h2 rv mt-24">Small team.<br /><span class="dim">Work that ships.</span></h2>
+      <div class="grid-auto-sm mt-48">
+        {
+          reasons.map((r, i) => (
+            <article class:list={["reason", reveal[i]]}>
+              <span class="reason-icon">
+                <Icon name={r.icon} size={20} />
+              </span>
+              <h3 class="reason-title">{r.title}</h3>
+              <p class="reason-body">{r.body}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section id="open-roles" class="section roles-section" aria-labelledby="roles-title">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="container relative">
+      <p class="eyebrow rv">Open positions</p>
+      <h2 id="roles-title" class="h2 rv mt-24">Come build<br /><span class="dim">something that matters.</span></h2>
+      <p class="lead rv2 mt-24">We hire for attitude and aptitude. If you're exceptional, we'll find a role for you.</p>
+
+      <div class="dept" role="group" aria-label="Filter roles by department" hidden data-dept-filter>
+        <button type="button" class="dept-btn" aria-pressed="true" data-dept="All">
+          All <span class="dept-count mono">{roles.length}</span>
+        </button>
+        {
+          departments.map((d) => (
+            <button type="button" class="dept-btn" aria-pressed="false" data-dept={d}>
+              {d} <span class="dept-count mono">{counts[d]}</span>
+            </button>
+          ))
+        }
+      </div>
+      <p class="sr-only" role="status" data-roles-status></p>
+
+      <div class="roles" data-roles>
+        {
+          roles.map((role) => (
+            <details class="role" id={role.id} name="roles" data-dept={role.department}>
+              <summary class="role-summary">
+                <span class="role-dept mono">{role.department}</span>
+                <h3 class="role-title">{role.title}</h3>
+                <span class="role-meta mono">
+                  {role.location} · <span class="role-type">{role.type}</span>
+                </span>
+                <span class="role-plus" aria-hidden="true">
+                  <Icon name="plus" size={16} stroke={2.4} />
+                </span>
+              </summary>
+              <div class="role-body">
+                <p class="role-desc">{role.description}</p>
+                <h4 class="role-req-title">What we're looking for</h4>
+                <ul class="role-req">
+                  {role.requirements.map((r) => (
+                    <li>
+                      <Icon name="check" size={16} stroke={2.4} />
+                      <span>{r}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div class="role-apply">
+                  <a class="btn btn-primary" href={applyHref(role)}>
+                    <Icon name="mail" size={18} />
+                    Apply for this role
+                  </a>
+                  <p class="fine role-apply-note">Opens an email to {EMAIL.careers}</p>
+                </div>
+              </div>
+            </details>
+          ))
+        }
+      </div>
+
+      <div class="open-cta rv">
+        <div>
+          <h3 class="open-cta-title">Don't see the right role?</h3>
+          <p class="body mt-12">
+            We're always interested in hearing from exceptional people. If you think you can help with what we're
+            building, even without a role listed here, send us a message.
+          </p>
+        </div>
+        <a class="btn btn-secondary" href={generalApplicationHref}>Get in touch</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight stack-section" aria-labelledby="stack-title">
+    <div class="container">
+      <div class="split stack-split">
+        <div>
+          <p class="eyebrow rv">The stack</p>
+          <h2 id="stack-title" class="h2 rv mt-24">What we<br /><span class="dim">build with.</span></h2>
+          <p class="lead rv2 mt-24">
+            Modern, well-supported tools that let us move fast without piling up technical debt.
+          </p>
+        </div>
+        <ul class="stack rv2">
+          {
+            stack.map((s) => (
+              <li class="stack-row">
+                <span class="stack-mark mono" aria-hidden="true">
+                  {s.mark}
+                </span>
+                <span class="stack-text">
+                  <span class="stack-name">{s.name}</span>
+                  <span class="stack-note">{s.note}</span>
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section hire-section" aria-labelledby="hire-title">
+    <div class="container">
+      <p class="eyebrow rv">Process</p>
+      <h2 id="hire-title" class="h2 rv mt-24">How we hire.<br /><span class="dim">Four steps, no maze.</span></h2>
+      <ol class="hire">
+        {
+          process.map((p, i) => (
+            <li class:list={["hire-step", reveal[i]]}>
+              <span class="hire-node mono" aria-hidden="true">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <h3 class="hire-title">{p.title}</h3>
+              <p class="hire-body">{p.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <CtaClosing
+    title='Ready to build<br><span class="shine">something great?</span>'
+    lead="We're a small team doing big things. Come help us."
+    primary={{ label: "View open roles", href: "#open-roles" }}
+    secondary={{ label: "Email the team", href: generalApplicationHref }}
+  />
+</BaseLayout>
+
+<style>
+  /* ---------- Why here ---------- */
+  .why {
+    padding-top: clamp(40px, 6vw, 72px);
+  }
+  .reason {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 28px;
+    border-radius: var(--radius-xl);
+    background: var(--glass);
+    border: 1px solid var(--line);
+  }
+  .reason-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: rgba(91, 108, 255, 0.14);
+    border: 1px solid rgba(91, 108, 255, 0.3);
+    color: var(--accent-4);
+  }
+  .reason-title {
+    margin: 8px 0 0;
+    font-size: 22px;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+  }
+  .reason-body {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+
+  /* ---------- Open roles ---------- */
+  .dept {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 48px;
+  }
+  .dept[hidden] {
+    display: none;
+  }
+  .dept-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 8px 0 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--soft);
+    font: 500 15px/1 var(--font-sans);
+    cursor: pointer;
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+  }
+  .dept-btn:hover {
+    border-color: rgba(255, 255, 255, 0.24);
+    color: var(--text);
+  }
+  .dept-btn[aria-pressed="true"] {
+    border-color: rgba(91, 108, 255, 0.6);
+    background: rgba(91, 108, 255, 0.18);
+    color: #fff;
+  }
+  .dept-count {
+    min-width: 26px;
+    padding: 4px 8px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-3);
+    font-size: 12px;
+    text-align: center;
+  }
+  .dept-btn[aria-pressed="true"] .dept-count {
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+  }
+
+  .roles {
+    margin-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .dept[hidden] + .sr-only + .roles {
+    margin-top: 48px;
+  }
+  .role {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    scroll-margin-top: 104px;
+  }
+  .role[hidden] {
+    display: none;
+  }
+  .role-summary {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "dept title plus"
+      "dept meta plus";
+    align-items: center;
+    gap: 6px 24px;
+    min-height: 44px;
+    padding: 26px 0;
+    cursor: pointer;
+  }
+  .role-summary::-webkit-details-marker {
+    display: none;
+  }
+  .role-dept {
+    grid-area: dept;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-3);
+  }
+  .role-title {
+    grid-area: title;
+    min-width: 0;
+    margin: 0;
+    font-size: clamp(22px, 2.4vw, 30px);
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+    font-weight: 700;
+    transition: color 0.2s ease;
+  }
+  .role-summary:hover .role-title {
+    color: var(--accent-4);
+  }
+  .role-meta {
+    grid-area: meta;
+    font-size: 13px;
+    color: var(--text-3);
+  }
+  .role-type {
+    white-space: nowrap;
+  }
+  .role-plus {
+    grid-area: plus;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    transition: background 0.3s ease;
+  }
+  .role-plus :global(svg) {
+    transition: transform 0.4s var(--ease-out);
+  }
+  .role[open] .role-plus {
+    background: rgba(91, 108, 255, 0.25);
+  }
+  .role[open] .role-plus :global(svg) {
+    transform: rotate(45deg);
+  }
+  .role-body {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    column-gap: 24px;
+    padding: 0 0 36px;
+  }
+  .role-body > * {
+    grid-column: 2;
+  }
+  .role[open] .role-body {
+    animation: role-open 0.6s var(--ease-out) both;
+  }
+  @keyframes role-open {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .role-desc {
+    margin: 0;
+    max-width: 680px;
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--text-2);
+  }
+  .role-req-title {
+    margin: 28px 0 0;
+    font: 500 12px/1.4 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .role-req {
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 680px;
+  }
+  .role-req li {
+    display: flex;
+    gap: 12px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--soft);
+  }
+  .role-req li :global(svg) {
+    flex: none;
+    margin-top: 4px;
+    color: var(--accent-3);
+  }
+  .role-apply {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+    margin-top: 32px;
+  }
+  .role-apply-note {
+    color: var(--text-4);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .open-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-top: 48px;
+    padding: clamp(24px, 4vw, 36px);
+    border-radius: var(--radius-xl);
+    background: var(--glass);
+    border: 1px solid var(--line);
+  }
+  .open-cta > div {
+    flex: 1 1 420px;
+    max-width: 640px;
+  }
+  .open-cta-title {
+    margin: 0;
+    font-size: 26px;
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+    font-weight: 700;
+  }
+
+  /* ---------- Stack ---------- */
+  .stack-split {
+    align-items: center;
+  }
+  .stack {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    background: var(--glass);
+    overflow: hidden;
+  }
+  .stack-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 18px 22px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .stack-row:first-child {
+    border-top: 0;
+  }
+  .stack-mark {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(91, 108, 255, 0.28), rgba(167, 139, 250, 0.14));
+    border: 1px solid rgba(139, 155, 255, 0.35);
+    color: #dfe4ff;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .stack-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .stack-name {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .stack-note {
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--text-3);
+  }
+
+  /* ---------- How we hire ---------- */
+  .hire {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+    margin: clamp(48px, 6vw, 72px) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .hire::before {
+    content: "";
+    position: absolute;
+    top: 27px;
+    left: 28px;
+    right: 28px;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent-3), rgba(139, 155, 255, 0.15));
+    box-shadow: 0 0 14px rgba(91, 108, 255, 0.6);
+  }
+  .hire-step {
+    position: relative;
+  }
+  .hire-node {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: #0d0f1c;
+    border: 1px solid rgba(139, 155, 255, 0.45);
+    box-shadow: 0 0 0 6px var(--bg), 0 0 28px rgba(91, 108, 255, 0.45);
+    color: var(--accent-4);
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .hire-step:first-child .hire-node {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .hire-title {
+    margin: 26px 0 0;
+    font-size: 24px;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+  }
+  .hire-body {
+    margin: 10px 0 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+
+  @media (max-width: 900px) {
+    .role-summary {
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas:
+        "dept plus"
+        "title plus"
+        "meta plus";
+      padding: 22px 0;
+    }
+    .role-body {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .role-body > * {
+      grid-column: 1;
+    }
+    .hire {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 36px;
+    }
+    .hire::before {
+      top: 28px;
+      bottom: 28px;
+      left: 27px;
+      right: auto;
+      width: 2px;
+      height: auto;
+      background: linear-gradient(180deg, var(--accent-3), rgba(139, 155, 255, 0.15));
+    }
+    .hire-step {
+      padding-left: 80px;
+      min-height: 56px;
+    }
+    .hire-node {
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+    .hire-title {
+      margin-top: 12px;
+    }
+  }
+</style>
+
+<script>
+  const group = document.querySelector<HTMLElement>("[data-dept-filter]");
+  const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-dept]")).filter(
+    (el) => el.tagName === "BUTTON",
+  );
+  const roles = Array.from(document.querySelectorAll<HTMLDetailsElement>("details.role"));
+  const status = document.querySelector<HTMLElement>("[data-roles-status]");
+
+  const plural = (n: number) => `${n} ${n === 1 ? "role" : "roles"}`;
+
+  const apply = (dept: string, updateUrl: boolean) => {
+    let shown = 0;
+    for (const role of roles) {
+      const show = dept === "All" || role.dataset.dept === dept;
+      role.hidden = !show;
+      if (!show) role.open = false;
+      if (show) shown += 1;
+    }
+    for (const b of buttons) b.setAttribute("aria-pressed", String(b.dataset.dept === dept));
+    if (status) status.textContent = dept === "All" ? `Showing all ${plural(shown)}` : `Showing ${plural(shown)} in ${dept}`;
+    if (updateUrl) {
+      const url = new URL(window.location.href);
+      if (dept === "All") url.searchParams.delete("dept");
+      else url.searchParams.set("dept", dept);
+      history.replaceState(history.state, "", `${url.pathname}${url.search}${url.hash}`);
+    }
+  };
+
+  if (group && buttons.length && roles.length) {
+    group.hidden = false;
+    for (const b of buttons) b.addEventListener("click", () => apply(b.dataset.dept ?? "All", true));
+
+    const known = buttons.map((b) => b.dataset.dept);
+    const requested = new URLSearchParams(window.location.search).get("dept");
+    if (requested && requested !== "All" && known.includes(requested)) apply(requested, false);
+  }
+
+  // /careers#<role-id> opens that role.
+  const openFromHash = () => {
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    const role = roles.find((r) => r.id === id);
+    if (!role) return;
+    if (role.hidden) apply("All", true);
+    role.open = true;
+    role.scrollIntoView({ block: "start" });
+  };
+  openFromHash();
+  window.addEventListener("hashchange", openFromHash);
+</script>

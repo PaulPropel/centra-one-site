@@ -1,0 +1,348 @@
+---
+// Served by the Worker's assets binding for any URL that doesn't exist ("404-page" in
+// wrangler.jsonc), so every link here is root-relative.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Icon from "../components/Icon.astro";
+import { LOGIN_URL } from "../data/site";
+
+const links = [
+  { href: "/", icon: "home", title: "Go home", text: "Back to the Centra One homepage." },
+  { href: "/help", icon: "help", title: "Help centre", text: "Find answers to common questions." },
+  { href: LOGIN_URL, icon: "login", title: "Sign in", text: "Access your Centra One account." },
+  { href: "/contact", icon: "message", title: "Contact us", text: "Get in touch with our team." },
+] as const;
+
+// The same three warehouses as the homepage (2,400 bins in all).
+const warehouses = [
+  { name: "Auckland", bins: "1,120" },
+  { name: "Wellington", bins: "640" },
+  { name: "Christchurch", bins: "640" },
+];
+---
+
+<BaseLayout
+  title="Page not found"
+  description="This page has moved, been deleted or never existed. Search the help centre or head back home."
+  noindex
+>
+  <section class="nf page-top">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="nf-glow" aria-hidden="true"></div>
+    <div class="container relative nf-grid">
+      <div class="nf-copy">
+        <p class="eyebrow in">Error 404</p>
+        <h1 class="h1 in d1 mt-24">This page is<br /><span class="dim">out of stock.</span></h1>
+        <p class="lead in d2 mt-24">
+          We checked every bin. The page you're after has moved, been deleted or never existed.
+        </p>
+        <form class="nf-search in d3 mt-32" action="/help" method="get" role="search">
+          <label class="label" for="nf-search">Search the help centre</label>
+          <div class="nf-search-row">
+            <div class="nf-search-box">
+              <span class="nf-search-icon" aria-hidden="true"><Icon name="search" size={18} /></span>
+              <input
+                id="nf-search"
+                class="input"
+                type="search"
+                name="search"
+                placeholder="What were you looking for?"
+                autocomplete="off"
+                enterkeyhint="search"
+              />
+            </div>
+            <button class="btn btn-primary" type="submit">Search</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="nf-visual in d3">
+        <div
+          class="nf-card glass-solid"
+          role="img"
+          aria-label="A stock check for this page across three warehouses and 2,400 bins found nothing."
+        >
+          <div class="nf-card-top mono">
+            <span class="nf-card-label">Stock check</span>
+            <span class="nf-zero">0 found</span>
+          </div>
+          <p class="nf-sku mono">
+            <span class="nf-sku-key">SKU</span>
+            <span class="nf-sku-path" data-nf-path>this-page</span>
+          </p>
+          <div class="nf-table mono">
+            <div class="nf-row nf-row-head"><span>Warehouse</span><span>Bins</span><span>On hand</span></div>
+            {
+              warehouses.map((w) => (
+                <div class="nf-row">
+                  <span>{w.name}</span>
+                  <span>{w.bins}</span>
+                  <span class="nf-none">0</span>
+                </div>
+              ))
+            }
+            <div class="nf-note">Not in any of 2,400 bins. Try the help centre.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight nf-more" aria-labelledby="nf-more-title">
+    <div class="container">
+      <h2 class="label" id="nf-more-title">Or head somewhere that exists</h2>
+      <div class="nf-links mt-16">
+        {
+          links.map((l) => (
+            <a class="nf-link" href={l.href}>
+              <span class="nf-link-icon">
+                <Icon name={l.icon} size={20} />
+              </span>
+              <span class="nf-link-title">{l.title}</span>
+              <span class="nf-link-text">{l.text}</span>
+              <span class="nf-link-arrow" aria-hidden="true">
+                <Icon name="arrow-right" size={18} />
+              </span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf {
+    position: relative;
+    overflow: hidden;
+    padding-bottom: clamp(48px, 6vw, 72px);
+  }
+  .nf-glow {
+    position: absolute;
+    right: -10%;
+    top: -120px;
+    width: 820px;
+    height: 720px;
+    pointer-events: none;
+    background: radial-gradient(closest-side, rgba(26, 26, 255, 0.3), rgba(26, 26, 255, 0)),
+      radial-gradient(40% 40% at 30% 70%, rgba(255, 90, 79, 0.1), rgba(255, 90, 79, 0));
+    filter: blur(8px);
+  }
+  .nf-grid {
+    display: grid;
+    gap: 48px;
+    align-items: center;
+  }
+  @media (min-width: 960px) {
+    .nf-grid {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: clamp(48px, 6vw, 88px);
+    }
+  }
+  .nf-copy {
+    min-width: 0;
+  }
+
+  /* ---------- Search ---------- */
+  .nf-search {
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .nf-search-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .nf-search-box {
+    position: relative;
+    flex: 1 1 260px;
+    min-width: 0;
+  }
+  .nf-search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    color: var(--text-3);
+    pointer-events: none;
+  }
+  .nf-search-box .input {
+    min-height: 52px;
+    padding-left: 46px;
+    border-radius: 16px;
+  }
+  .nf-search .btn {
+    flex: none;
+  }
+
+  /* ---------- Stock check card ---------- */
+  .nf-visual {
+    min-width: 0;
+  }
+  .nf-card {
+    max-width: 480px;
+    margin-inline: auto;
+    padding: 22px;
+    border-radius: 24px;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 50px 120px -50px rgba(26, 26, 255, 0.55);
+  }
+  .nf-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .nf-zero {
+    padding: 4px 10px;
+    border-radius: 980px;
+    background: rgba(255, 90, 79, 0.14);
+    color: var(--red-2);
+  }
+  .nf-sku {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 16px 0 0;
+    font-size: 15px;
+    color: var(--text);
+    min-width: 0;
+  }
+  .nf-sku-key {
+    flex: none;
+    font-size: 11px;
+    color: var(--text-4);
+  }
+  .nf-sku-path {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-table {
+    margin-top: 16px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    font-size: 13px;
+  }
+  .nf-row {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--soft);
+  }
+  .nf-row span:not(:first-child) {
+    text-align: right;
+  }
+  .nf-row-head {
+    border-top: 0;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-4);
+    font-size: 11px;
+    text-transform: uppercase;
+  }
+  .nf-none {
+    color: var(--red-2);
+  }
+  .nf-note {
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 90, 79, 0.08);
+    color: var(--red-2);
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+
+  /* ---------- Links ---------- */
+  .nf-more {
+    padding-top: clamp(24px, 4vw, 48px);
+  }
+  .nf-more .label {
+    margin: 0;
+  }
+  .nf-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: 12px;
+  }
+  .nf-link {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    min-height: 168px;
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    background: var(--glass);
+    border: 1px solid var(--line);
+    color: var(--text);
+    transition:
+      border-color 0.3s ease,
+      background 0.3s ease;
+  }
+  .nf-link:hover {
+    color: var(--text);
+    border-color: rgba(122, 140, 255, 0.55);
+    background: rgba(91, 108, 255, 0.08);
+  }
+  .nf-link-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(91, 108, 255, 0.14);
+    color: var(--accent-4);
+  }
+  .nf-link-title {
+    margin-top: 14px;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .nf-link-text {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-2);
+  }
+  .nf-link-arrow {
+    position: absolute;
+    top: 26px;
+    right: 24px;
+    display: flex;
+    color: var(--text-4);
+    transition:
+      transform 0.3s var(--ease-out),
+      color 0.3s ease;
+  }
+  .nf-link:hover .nf-link-arrow {
+    transform: translateX(3px);
+    color: var(--accent-3);
+  }
+</style>
+
+<script>
+  // Show the address they tried on the stock-check card.
+  const el = document.querySelector<HTMLElement>("[data-nf-path]");
+  if (el) {
+    let path = window.location.pathname;
+    try {
+      path = decodeURIComponent(path);
+    } catch {
+      // keep the encoded path
+    }
+    path = path.replace(/^\/+|\/+$/g, "");
+    if (path && path !== "404") el.textContent = path.length > 60 ? `${path.slice(0, 59)}…` : path;
+  }
+</script>

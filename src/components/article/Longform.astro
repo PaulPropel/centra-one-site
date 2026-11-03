@@ -1,0 +1,131 @@
+---
+// Rendered Markdown in the .prose measure, plus the extras long-form pages need:
+// typed callouts (see longform.ts), numbered step lists and formula boxes.
+// `html` is our own build-time Markdown output (trusted).
+import { enhanceCallouts } from "./longform";
+
+interface Props {
+  html: string;
+  class?: string;
+}
+const { html, class: className } = Astro.props;
+---
+
+<div class:list={["prose", "longform", className]} set:html={enhanceCallouts(html)} />
+
+<style>
+  .longform {
+    min-width: 0;
+  }
+  .longform :global(h2) {
+    scroll-margin-top: 112px;
+  }
+  .longform :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  /* Numbered steps: mono counters in small rounded squares, like the homepage chips. */
+  .longform :global(ol) {
+    list-style: none;
+    padding-left: 0;
+    counter-reset: step;
+  }
+  .longform :global(ol > li) {
+    position: relative;
+    margin: 0.55em 0;
+    padding-left: 42px;
+    counter-increment: step;
+  }
+  .longform :global(ol > li::before) {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0.12em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 27px;
+    height: 27px;
+    border-radius: 8px;
+    background: rgba(91, 108, 255, 0.14);
+    border: 1px solid rgba(91, 108, 255, 0.3);
+    color: var(--accent-4);
+    font: 600 12px/1 var(--font-mono);
+  }
+
+  /* Callouts */
+  .longform :global(.callout) {
+    position: relative;
+    margin: 1.6em 0;
+    padding: 18px 20px 18px 22px;
+    border-radius: 18px;
+    background: rgba(91, 108, 255, 0.07);
+    border: 1px solid rgba(91, 108, 255, 0.28);
+  }
+  .longform :global(.callout p:last-child) {
+    margin-bottom: 0;
+  }
+  .longform :global(.callout-label) {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0 0 8px;
+    font: 500 12px/1.4 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-4);
+  }
+  .longform :global(.callout-label::before) {
+    content: "";
+    flex: none;
+    margin-top: 0.45em;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 12px currentColor;
+  }
+  .longform :global(.callout-warn) {
+    background: rgba(255, 179, 64, 0.07);
+    border-color: rgba(255, 179, 64, 0.32);
+  }
+  .longform :global(.callout-warn .callout-label) {
+    color: var(--amber);
+  }
+  .longform :global(.callout-roadmap) {
+    background: rgba(167, 139, 250, 0.08);
+    border-color: rgba(167, 139, 250, 0.34);
+  }
+  .longform :global(.callout-roadmap .callout-label) {
+    color: var(--violet-2);
+  }
+  .longform :global(.callout-formula) {
+    padding: 22px 24px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border-color: var(--line-2);
+  }
+  .longform :global(.callout-formula .callout-label) {
+    color: var(--accent-3);
+  }
+  .longform :global(.callout-formula code) {
+    display: block;
+    margin: 4px 0 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: rgba(5, 6, 10, 0.6);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .longform :global(.callout-formula p:has(> code:only-child)) {
+    margin: 0;
+  }
+  .longform :global(.callout-formula p:not(.callout-label):not(:has(> code:only-child))) {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-3);
+  }
+</style>

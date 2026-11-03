@@ -1,0 +1,560 @@
+---
+// Stock on hand for the par level worked example: sell 8 a day, reorder at 168, the delivery
+// lands 14 days later just as stock reaches the 56 units of safety stock.
+// Lines are SVG (stretched to the plot, strokes stay 2px); every label is HTML so it stays
+// readable at phone width. The full version has a hover and keyboard readout and a table view;
+// `compact` is a quiet illustration for cards (decorative, hidden from assistive tech).
+interface Props {
+  compact?: boolean;
+  class?: string;
+}
+const { compact = false, class: className } = Astro.props;
+
+const USAGE = 8; // units a day
+const PAR = 168;
+const SAFETY = 56;
+const LEAD = 14; // days
+const ORDER = 224; // four weeks of sales
+const START = 280;
+const DAYS = 42;
+const YMAX = 320;
+
+// Day-by-day stock, with two points on a delivery day (before and after it lands).
+interface Point {
+  day: number;
+  units: number;
+}
+const points: Point[] = [];
+const orders: number[] = [];
+const deliveries: number[] = [];
+let units = START;
+let arrives: number | null = null;
+for (let day = 0; day <= DAYS; day += 1) {
+  if (arrives === day) {
+    points.push({ day, units });
+    units += ORDER;
+    deliveries.push(day);
+    arrives = null;
+  }
+  points.push({ day, units });
+  if (units <= PAR && arrives === null) {
+    orders.push(day);
+    arrives = day + LEAD;
+  }
+  units -= USAGE;
+}
+
+const sx = (day: number) => day;
+const sy = (u: number) => YMAX - u;
+const line = points.map((p, i) => `${i ? "L" : "M"}${sx(p.day)},${sy(p.units)}`).join(" ");
+const area = `${line} L${DAYS},${YMAX} L0,${YMAX} Z`;
+const pctX = (day: number) => `${((day / DAYS) * 100).toFixed(3)}%`;
+const pctY = (u: number) => `${((u / YMAX) * 100).toFixed(3)}%`;
+
+// Readout for every day: what's on hand at the start of the day, and the delivery if one lands.
+const readout = Array.from({ length: DAYS + 1 }, (_, day) => {
+  const onDay = points.filter((p) => p.day === day);
+  const before = onDay[0]?.units ?? 0;
+  const after = onDay[onDay.length - 1]?.units ?? before;
+  const note = deliveries.includes(day) ? "delivery lands" : orders.includes(day) ? "order placed" : "";
+  return { day, before, after, note };
+});
+const tableDays = [0, 7, 14, 21, 28, 35, 42];
+const firstOrder = orders[0] ?? LEAD;
+const firstDelivery = deliveries[0] ?? firstOrder + LEAD;
+const yTicks = [0, SAFETY, PAR, START];
+const xTicks = [0, 14, 28, 42];
+---
+
+<figure class:list={["plc", { "plc-compact": compact }, className]} data-plc={compact ? undefined : ""} aria-hidden={compact ? "true" : undefined}>
+  <div class="plc-plot">
+    <div class="plc-area" data-plc-area>
+      <svg class="plc-svg" viewBox={`0 0 ${DAYS} ${YMAX}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <rect class="plc-band" x="0" y={sy(SAFETY)} width={DAYS} height={SAFETY}></rect>
+        <line class="plc-band-top" x1="0" x2={DAYS} y1={sy(SAFETY)} y2={sy(SAFETY)} vector-effect="non-scaling-stroke"></line>
+        <path class="plc-fill" d={area}></path>
+        <line class="plc-par" x1="0" x2={DAYS} y1={sy(PAR)} y2={sy(PAR)} vector-effect="non-scaling-stroke"></line>
+        <path class="plc-line" d={line} pathLength="1" vector-effect="non-scaling-stroke"></path>
+      </svg>
+
+      <span class="plc-label plc-label-par" style={`bottom: ${pctY(PAR)}`}>Par level</span>
+      <span class="plc-label plc-label-safety">Safety stock</span>
+
+      {
+        orders.map((day, i) => (
+          <span class:list={["plc-dot", { "plc-dot-quiet": i > 0 }]} style={`left: ${pctX(day)}; bottom: ${pctY(PAR)}`} />
+        ))
+      }
+      {deliveries.map((day) => <span class="plc-dot plc-dot-delivery" style={`left: ${pctX(day)}; bottom: ${pctY(SAFETY)}`} />)}
+
+      {
+        !compact && (
+          <>
+            <span class="plc-label plc-label-order" style={`left: ${pctX(firstOrder)}; bottom: ${pctY(PAR)}`}>
+              Order placed
+            </span>
+            <span class="plc-label plc-label-delivery" style={`left: ${pctX(firstDelivery)}; bottom: ${pctY(SAFETY)}`}>
+              Delivery lands
+            </span>
+            <span
+              class="plc-lead"
+              style={`left: ${pctX(firstOrder)}; width: ${pctX(firstDelivery - firstOrder)}; bottom: ${pctY(242)}`}
+            >
+              <span class="plc-lead-label">{LEAD}-day lead time</span>
+            </span>
+            {yTicks.map((t) => (
+              <span class="plc-ytick mono" style={`bottom: ${pctY(t)}`}>
+                {t}
+              </span>
+            ))}
+            {xTicks.map((t) => (
+              <span class:list={["plc-xtick mono", { "plc-xtick-first": t === 0 }]} style={`left: ${pctX(t)}`}>
+                {t === 0 ? "Day 0" : t}
+              </span>
+            ))}
+            <span class="plc-cross" data-plc-cross hidden />
+            <span class="plc-cursor" data-plc-cursor hidden />
+            <span class="plc-tip" data-plc-tip hidden>
+              <strong data-plc-tip-value />
+              <span data-plc-tip-label />
+            </span>
+          </>
+        )
+      }
+    </div>
+  </div>
+
+  {
+    !compact && (
+      <>
+        <label class="sr-only" for="plc-scrub">
+          Stock on hand by day, from day 0 to day {DAYS}
+        </label>
+        <input
+          id="plc-scrub"
+          class="sr-only plc-scrub"
+          type="range"
+          min="0"
+          max={DAYS}
+          step="1"
+          value={firstOrder}
+          data-plc-scrub
+          data-readout={JSON.stringify(readout)}
+        />
+        <figcaption class="plc-caption">
+          <span class="plc-caption-title">Stock on hand in the worked example.</span> Selling {USAGE} a day, the order
+          goes in at the par level of {PAR} and lands {LEAD} days later, just as stock reaches the {SAFETY} units of
+          safety stock. Assumes each order is {ORDER} units, four weeks of sales.
+          <span class="plc-hint"> Hover the chart, or tab to it and use the arrow keys, to read any day.</span>
+        </figcaption>
+        <details class="plc-data">
+          <summary>Show the numbers</summary>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Day</th>
+                <th scope="col" class="num">
+                  Units on hand
+                </th>
+                <th scope="col">What happens</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tableDays.map((day) => {
+                const r = readout[day];
+                return (
+                  <tr>
+                    <td>{day}</td>
+                    <td class="num">{r.before === r.after ? r.before : `${r.before} then ${r.after}`}</td>
+                    <td>
+                      {r.note === "order placed"
+                        ? "Stock hits the par level: order placed"
+                        : r.note === "delivery lands"
+                          ? `Delivery of ${ORDER} lands as stock reaches safety stock`
+                          : ""}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </details>
+      </>
+    )
+  }
+</figure>
+
+<style>
+  .plc {
+    margin: 0;
+  }
+  .plc-plot {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+    border: 1px solid var(--line);
+  }
+  .plc-area {
+    position: absolute;
+    inset: 28px 20px 40px 52px;
+  }
+  .plc-compact .plc-plot {
+    aspect-ratio: auto;
+    height: 100%;
+    min-height: 220px;
+    background: none;
+    border: 0;
+  }
+  .plc-compact .plc-area {
+    inset: 18px 12px 18px 12px;
+  }
+  .plc-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .plc-band {
+    fill: rgba(255, 255, 255, 0.05);
+  }
+  .plc-band-top {
+    stroke: var(--line-2);
+    stroke-width: 1px;
+  }
+  .plc-fill {
+    fill: rgba(139, 155, 255, 0.1);
+  }
+  .plc-par {
+    stroke: var(--amber);
+    stroke-width: 1.5px;
+    stroke-dasharray: 6 5;
+  }
+  .plc-line {
+    fill: none;
+    stroke: var(--accent-3);
+    stroke-width: 2px;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .plc-label {
+    position: absolute;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--text-2);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .plc-label-par {
+    left: 10px;
+    margin-bottom: 8px;
+  }
+  .plc-label-safety {
+    left: 10px;
+    bottom: 8px;
+    color: var(--text-3);
+  }
+  .plc-label-order {
+    margin: 0 0 14px 12px;
+  }
+  .plc-label-delivery {
+    margin: 0 0 12px 12px;
+  }
+  .plc-dot {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    margin: 0 0 -6px -6px;
+    border-radius: 50%;
+    background: var(--accent-3);
+    box-shadow: 0 0 0 2px #090b13, 0 0 16px rgba(139, 155, 255, 0.8);
+  }
+  .plc-dot-delivery {
+    background: #fff;
+  }
+  .plc-dot-quiet {
+    box-shadow: 0 0 0 2px #090b13;
+  }
+  .plc-lead {
+    position: absolute;
+    height: 10px;
+    border: 1px solid var(--text-4);
+    border-bottom: 0;
+    border-radius: 2px 2px 0 0;
+    pointer-events: none;
+  }
+  .plc-lead-label {
+    position: absolute;
+    left: 50%;
+    bottom: 100%;
+    margin-bottom: 6px;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: var(--text-3);
+    white-space: nowrap;
+  }
+  .plc-ytick {
+    position: absolute;
+    right: 100%;
+    margin: 0 10px -7px 0;
+    font-size: 11px;
+    line-height: 14px;
+    color: var(--text-4);
+  }
+  .plc-xtick {
+    position: absolute;
+    top: 100%;
+    margin-top: 12px;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: var(--text-4);
+    white-space: nowrap;
+  }
+  .plc-xtick-first {
+    transform: none;
+  }
+
+  /* Readout */
+  .plc-cross {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.3);
+    pointer-events: none;
+  }
+  .plc-cursor {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    margin: 0 0 -6px -6px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 2px #090b13, 0 0 0 5px rgba(139, 155, 255, 0.45);
+    pointer-events: none;
+  }
+  .plc-tip {
+    position: absolute;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 128px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(14, 16, 28, 0.94);
+    border: 1px solid var(--line-2);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+  }
+  .plc-tip strong {
+    font-size: 16px;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .plc-tip span {
+    font-size: 12px;
+    color: var(--text-3);
+  }
+  .plc-cross[hidden],
+  .plc-cursor[hidden],
+  .plc-tip[hidden] {
+    display: none;
+  }
+  [data-plc-area] {
+    touch-action: pan-y;
+  }
+  .plc:has(.plc-scrub:focus-visible) .plc-plot {
+    outline: 2px solid var(--accent-3);
+    outline-offset: 3px;
+  }
+
+  .plc-caption {
+    margin-top: 14px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text-3);
+  }
+  .plc-caption-title {
+    color: var(--text-2);
+    font-weight: 600;
+  }
+  .plc-data {
+    margin-top: 10px;
+    font-size: 14px;
+  }
+  .plc-data summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    cursor: pointer;
+    color: var(--accent-3);
+    font-weight: 600;
+  }
+  .plc-data table {
+    margin: 4px 0 0;
+    width: 100%;
+    font-size: 14px;
+    display: table;
+  }
+  .plc-data .num {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The line draws itself once, when the chart scrolls into view. */
+  .plc.is-armed .plc-line {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  .plc.is-armed .plc-dot,
+  .plc.is-armed .plc-label-order,
+  .plc.is-armed .plc-label-delivery,
+  .plc.is-armed .plc-lead {
+    opacity: 0;
+  }
+  .plc.is-drawn .plc-line {
+    animation: plc-draw 1.8s var(--ease-out) forwards;
+  }
+  .plc.is-drawn .plc-dot,
+  .plc.is-drawn .plc-label-order,
+  .plc.is-drawn .plc-label-delivery,
+  .plc.is-drawn .plc-lead {
+    animation: plc-fade 0.6s ease 1.1s forwards;
+  }
+  @keyframes plc-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes plc-fade {
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .plc-plot {
+      aspect-ratio: 1 / 1;
+    }
+    .plc-area {
+      inset: 30px 14px 36px 40px;
+    }
+    .plc-label {
+      font-size: 12px;
+    }
+    .plc-lead-label {
+      font-size: 11px;
+    }
+    .plc-hint {
+      display: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .plc.is-armed .plc-line {
+      stroke-dasharray: none;
+      stroke-dashoffset: 0;
+    }
+    .plc.is-armed .plc-dot,
+    .plc.is-armed .plc-label-order,
+    .plc.is-armed .plc-label-delivery,
+    .plc.is-armed .plc-lead {
+      opacity: 1;
+    }
+  }
+</style>
+
+<script>
+  interface Row {
+    day: number;
+    before: number;
+    after: number;
+    note: string;
+  }
+
+  for (const fig of document.querySelectorAll<HTMLElement>("[data-plc]")) {
+    const area = fig.querySelector<HTMLElement>("[data-plc-area]");
+    const scrub = fig.querySelector<HTMLInputElement>("[data-plc-scrub]");
+    const cross = fig.querySelector<HTMLElement>("[data-plc-cross]");
+    const cursor = fig.querySelector<HTMLElement>("[data-plc-cursor]");
+    const tip = fig.querySelector<HTMLElement>("[data-plc-tip]");
+    const tipValue = fig.querySelector<HTMLElement>("[data-plc-tip-value]");
+    const tipLabel = fig.querySelector<HTMLElement>("[data-plc-tip-label]");
+    if (!area || !scrub || !cross || !cursor || !tip || !tipValue || !tipLabel) continue;
+
+    let rows: Row[] = [];
+    try {
+      rows = JSON.parse(scrub.dataset.readout ?? "[]");
+    } catch {
+      continue;
+    }
+    const days = rows.length - 1;
+    const ymax = 320;
+    if (days < 1) continue;
+
+    const describe = (r: Row) =>
+      r.before === r.after ? `${r.after} units on hand` : `${r.before} units, then ${r.after} when the delivery lands`;
+
+    const show = (day: number) => {
+      const r = rows[Math.max(0, Math.min(days, day))];
+      const x = (r.day / days) * 100;
+      cross.style.left = `${x}%`;
+      cursor.style.left = `${x}%`;
+      cursor.style.bottom = `${(r.after / ymax) * 100}%`;
+      tipValue.textContent = r.before === r.after ? `${r.after} units` : `${r.before} → ${r.after} units`;
+      tipLabel.textContent = `Day ${r.day}${r.note ? `: ${r.note}` : ""}`;
+      // Keep the readout inside the plot: right of the line, or left of it past the middle.
+      if (x > 55) {
+        tip.style.left = "";
+        tip.style.right = `calc(${100 - x}% + 12px)`;
+      } else {
+        tip.style.right = "";
+        tip.style.left = `calc(${x}% + 12px)`;
+      }
+      cross.hidden = false;
+      cursor.hidden = false;
+      tip.hidden = false;
+      scrub.setAttribute("aria-valuetext", `Day ${r.day}: ${describe(r)}${r.note ? `, ${r.note}` : ""}`);
+    };
+    const hide = () => {
+      cross.hidden = true;
+      cursor.hidden = true;
+      tip.hidden = true;
+    };
+
+    area.addEventListener("pointermove", (e) => {
+      const box = area.getBoundingClientRect();
+      const day = Math.round(((e.clientX - box.left) / box.width) * days);
+      scrub.value = String(Math.max(0, Math.min(days, day)));
+      show(Number(scrub.value));
+    });
+    area.addEventListener("pointerleave", () => {
+      if (document.activeElement !== scrub) hide();
+    });
+    scrub.addEventListener("input", () => show(Number(scrub.value)));
+    scrub.addEventListener("focus", () => show(Number(scrub.value)));
+    scrub.addEventListener("blur", hide);
+    scrub.setAttribute("aria-valuetext", `Day ${scrub.value}: ${describe(rows[Number(scrub.value)])}`);
+
+    // Draw the line once when the chart comes into view.
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduce && "IntersectionObserver" in window) {
+      fig.classList.add("is-armed");
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((en) => en.isIntersecting)) {
+            fig.classList.add("is-drawn");
+            io.disconnect();
+          }
+        },
+        { threshold: 0.45 },
+      );
+      io.observe(fig);
+    }
+  }
+</script>

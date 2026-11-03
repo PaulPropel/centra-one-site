@@ -1,0 +1,165 @@
+---
+// Where the enquiry Worker sends people after a successful post without JavaScript.
+// (With JavaScript, /contact shows the same thanks in place.)
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { SIGNUP_URL, REPLY_TIME } from "../../data/site";
+import { TRIAL_DAYS } from "../../data/pricing";
+---
+
+<BaseLayout
+  title="Enquiry sent"
+  description="Thanks for getting in touch. A real person replies within one business day."
+  noindex
+>
+  <section class="sent page-top center">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="sent-glow" aria-hidden="true"></div>
+    <div class="container relative">
+      <div class="sent-mark in" aria-hidden="true">
+        <svg width="88" height="88" viewBox="0 0 64 64" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <circle class="sent-ring" cx="32" cy="32" r="29"></circle>
+          <path class="sent-tick" d="M20 33.5 28 41.5 44.5 24"></path>
+        </svg>
+      </div>
+      <p class="eyebrow in d1 mt-32">Enquiry sent</p>
+      <h1 class="h1 in d1 mt-24">Thanks, your enquiry<br /><span class="dim">is in.</span></h1>
+      <p class="lead in d2 mt-24">A real person replies {REPLY_TIME}.</p>
+      <div class="btn-row in d3 mt-32">
+        <a class="btn btn-secondary" href="/">Back to home</a>
+        <a class="btn btn-ghost" href="/help">Browse the help centre</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight sent-next" aria-labelledby="sent-next-title">
+    <div class="container">
+      <h2 class="label center" id="sent-next-title">What happens next</h2>
+      <ol class="steps mt-24">
+        <li class="step rv">
+          <span class="step-num mono" aria-hidden="true">01</span>
+          <h3 class="step-title">A real person reads it.</h3>
+          <p class="step-text">Nothing automated, no drip campaign. Your enquiry goes straight to the team.</p>
+        </li>
+        <li class="step rv2">
+          <span class="step-num mono" aria-hidden="true">02</span>
+          <h3 class="step-title">We reply {REPLY_TIME}.</h3>
+          <p class="step-text">Keep an eye on your inbox, and on your spam folder just in case.</p>
+        </li>
+        <li class="step step-accent rv3">
+          <span class="step-num mono" aria-hidden="true">03</span>
+          <h3 class="step-title">Meanwhile, try it yourself.</h3>
+          <p class="step-text">Start a {TRIAL_DAYS}-day free trial. No credit card needed.</p>
+          <a class="step-link" href={SIGNUP_URL}>Start free trial <span aria-hidden="true">→</span></a>
+        </li>
+      </ol>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .sent {
+    position: relative;
+    overflow: hidden;
+    padding-bottom: clamp(48px, 6vw, 80px);
+  }
+  .sent-glow {
+    position: absolute;
+    left: 50%;
+    top: -220px;
+    width: 900px;
+    height: 680px;
+    margin-left: -450px;
+    pointer-events: none;
+    background: radial-gradient(closest-side, rgba(52, 211, 153, 0.16), rgba(52, 211, 153, 0)),
+      radial-gradient(closest-side, rgba(26, 26, 255, 0.26), rgba(26, 26, 255, 0));
+    filter: blur(8px);
+  }
+  .sent-mark {
+    display: flex;
+    justify-content: center;
+  }
+  .sent-mark svg {
+    display: block;
+    filter: drop-shadow(0 18px 50px rgba(52, 211, 153, 0.35));
+  }
+  .sent-ring {
+    stroke: rgba(52, 211, 153, 0.5);
+    stroke-width: 2;
+    fill: rgba(52, 211, 153, 0.08);
+  }
+  .sent-tick {
+    stroke: var(--green);
+    stroke-width: 4;
+    stroke-dasharray: 40;
+    stroke-dashoffset: 40;
+    animation: sent-draw 0.7s var(--ease-out) 0.55s forwards;
+  }
+  @keyframes sent-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sent-tick {
+      animation: none;
+      stroke-dashoffset: 0;
+    }
+  }
+  .sent h1 {
+    max-width: 900px;
+    margin-inline: auto;
+  }
+
+  .sent-next {
+    padding-top: 0;
+  }
+  .sent-next .label {
+    margin: 0;
+  }
+  .steps {
+    list-style: none;
+    margin-bottom: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: 16px;
+  }
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 28px;
+    border-radius: var(--radius-xl);
+    background: var(--glass);
+    border: 1px solid var(--line);
+  }
+  .step-accent {
+    background: rgba(91, 108, 255, 0.08);
+    border-color: rgba(91, 108, 255, 0.35);
+  }
+  .step-num {
+    font-size: 12px;
+    color: var(--accent-3);
+  }
+  .step-title {
+    margin: 14px 0 0;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    font-weight: 700;
+  }
+  .step-text {
+    margin: 10px 0 0;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+  .step-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    margin-top: 8px;
+    font-weight: 600;
+  }
+</style>

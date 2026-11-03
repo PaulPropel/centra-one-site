@@ -1,0 +1,92 @@
+---
+// "Still need help?" Closes the help centre and every help article.
+import Icon from "../Icon.astro";
+import { EMAIL, REPLY_TIME } from "../../data/site";
+
+interface Props {
+  /** Heading level for the title, so it fits the page's outline. */
+  level?: 2 | 3;
+}
+const { level = 2 } = Astro.props;
+---
+
+<section class="section-tight support" aria-labelledby="support-title">
+  <div class="container">
+    <div class="support-card rv">
+      <div class="support-glow" aria-hidden="true"></div>
+      <div class="support-copy">
+        <p class="support-status mono"><span class="live" aria-hidden="true"></span>Support team · replies {REPLY_TIME}</p>
+        {
+          level === 2 ? (
+            <h2 id="support-title" class="support-title">Still need help?</h2>
+          ) : (
+            <h3 id="support-title" class="support-title">Still need help?</h3>
+          )
+        }
+        <p class="body support-body">
+          Tell us what's happening and where you saw it. A real person on our support team will help you sort it out.
+        </p>
+        <div class="btn-row support-actions">
+          <a class="btn btn-primary" href="/contact?kind=support#form">Contact support</a>
+          <a class="btn btn-secondary" href={`mailto:${EMAIL.support}`}>
+            <Icon name="mail" size={18} />
+            {EMAIL.support}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .support-card {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(28px, 5vw, 56px);
+    border-radius: var(--radius-xl);
+    background: var(--glass);
+    border: 1px solid rgba(91, 108, 255, 0.3);
+  }
+  .support-glow {
+    position: absolute;
+    right: -180px;
+    top: -220px;
+    width: 620px;
+    height: 620px;
+    pointer-events: none;
+    background: radial-gradient(closest-side, rgba(26, 26, 255, 0.32), rgba(26, 26, 255, 0));
+    filter: blur(10px);
+  }
+  .support-copy {
+    position: relative;
+    max-width: 640px;
+  }
+  .support-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--green);
+  }
+  .support-title {
+    margin: 18px 0 0;
+    font-size: clamp(36px, 4.6vw, 60px);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-weight: 700;
+  }
+  .support-body {
+    margin-top: 18px;
+    max-width: 520px;
+  }
+  .support-actions {
+    margin-top: 28px;
+  }
+  .support-actions .btn {
+    white-space: normal;
+    text-align: center;
+  }
+</style>

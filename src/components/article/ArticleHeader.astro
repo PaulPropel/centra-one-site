@@ -1,0 +1,124 @@
+---
+// Header for long-form pages (help articles, blog posts): breadcrumbs, the page's only <h1>,
+// an optional lead and a mono meta line. Same grid and glow as PageHeader, sized for reading.
+interface Crumb {
+  label: string;
+  href: string;
+}
+interface Props {
+  /** Parent pages, outermost first. The current page is the h1, so it isn't repeated here. */
+  crumbs: Crumb[];
+  title: string;
+  lead?: string;
+  meta?: string[];
+}
+const { crumbs, title, lead, meta = [] } = Astro.props;
+---
+
+<section class="article-header page-top">
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="article-header-glow" aria-hidden="true"></div>
+  <div class="container relative">
+    <nav class="crumbs in" aria-label="Breadcrumb">
+      <ol>
+        {
+          crumbs.map((c) => (
+            <li>
+              <a href={c.href}>{c.label}</a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+    <h1 class="article-title in d1">{title}</h1>
+    {lead && <p class="lead article-lead in d2">{lead}</p>}
+    {
+      meta.length > 0 && (
+        <p class="article-meta fine in d3">
+          {meta.map((m) => (
+            <span>{m}</span>
+          ))}
+        </p>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .article-header {
+    position: relative;
+    overflow: hidden;
+    padding-bottom: clamp(40px, 5vw, 64px);
+    border-bottom: 1px solid var(--line);
+  }
+  .article-header-glow {
+    position: absolute;
+    pointer-events: none;
+    width: 900px;
+    height: 620px;
+    left: 22%;
+    top: -280px;
+    margin-left: -450px;
+    background: radial-gradient(closest-side, rgba(26, 26, 255, 0.28), rgba(26, 26, 255, 0)),
+      radial-gradient(40% 40% at 78% 40%, rgba(167, 139, 250, 0.12), rgba(167, 139, 250, 0));
+    filter: blur(8px);
+  }
+  .crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font: 500 13px/1.4 var(--font-mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .crumbs li {
+    display: inline-flex;
+    align-items: center;
+  }
+  .crumbs li + li::before {
+    content: "/";
+    margin: 0 12px;
+    color: var(--text-4);
+  }
+  .crumbs a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--accent-3);
+  }
+  .crumbs a:hover {
+    color: var(--accent-4);
+  }
+  .article-title {
+    margin: 12px 0 0;
+    max-width: 920px;
+    font-size: clamp(38px, 5.2vw, 70px);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-weight: 700;
+  }
+  .article-lead {
+    margin-top: 24px;
+    max-width: 680px;
+  }
+  .article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 0;
+    margin-top: 28px;
+    color: var(--text-3);
+  }
+  /* Each item keeps its separator, so a wrapped line never starts with a dot. */
+  .article-meta span {
+    white-space: nowrap;
+  }
+  .article-meta span:not(:last-child)::after {
+    content: "·";
+    margin: 0 10px;
+    color: var(--text-4);
+  }
+</style>

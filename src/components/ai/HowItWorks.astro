@@ -1,0 +1,440 @@
+---
+// /ai "How it works": ask, watch, act. Each row pairs the copy with a small mock of the app.
+// Mock buttons are spans (aria-hidden), never real controls.
+import Icon from "../Icon.astro";
+import { exampleQuestions, alertFeed, aiActions } from "../../data/ai";
+
+const [firstAction, ...otherActions] = aiActions;
+---
+
+<div class="hiw">
+  <article class="hiw-row">
+    <div class="hiw-copy rv">
+      <p class="eyebrow hiw-step"><Icon name="message" size={15} /> Ask</p>
+      <h3 class="hiw-title">Ask anything about your business.</h3>
+      <p class="body hiw-body">
+        Centra AI has the context of your whole business, not just the page you're on. Ask about stock levels, customer
+        history, margins or overdue invoices, and get a specific answer in seconds.
+      </p>
+    </div>
+    <div class="hiw-mock rv2">
+      <div class="ask glass-solid">
+        <div class="ask-input">
+          <img src="/images/centra-one-logo.png" alt="" width="26" height="26" loading="lazy" decoding="async" />
+          <span class="ask-placeholder">Ask Centra AI anything</span>
+          <span class="ask-send" aria-hidden="true"><Icon name="arrow-up" size={16} stroke={2.4} /></span>
+        </div>
+        <p class="ask-label mono">Try asking</p>
+        <ul class="ask-list">
+          {
+            exampleQuestions.map((q, i) => (
+              <li class:list={["ask-item", { "is-on": i === 0 }]}>
+                <Icon name="search" size={15} class="ask-icon" />
+                <span>{q}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </article>
+
+  <article class="hiw-row hiw-flip">
+    <div class="hiw-copy rv">
+      <p class="eyebrow hiw-step"><Icon name="bell" size={15} /> Watch</p>
+      <h3 class="hiw-title">It watches your business 24 hours a day.</h3>
+      <p class="body hiw-body">
+        You can't watch everything at once. Centra AI can. It keeps an eye on stock levels, order status, invoice due
+        dates, expiring stock and reorder points, and tells you what needs attention before it becomes a problem.
+      </p>
+    </div>
+    <div class="hiw-mock rv2">
+      <div class="feed glass-solid">
+        <div class="mock-head mono">
+          <span class="mock-head-live"><span class="live" aria-hidden="true"></span>Growth Intel</span>
+          <span>Today</span>
+        </div>
+        <ul class="feed-list">
+          {
+            alertFeed.map((a) => (
+              <li class="feed-row">
+                <span class:list={["sev", `sev-${a.tone}`]} aria-hidden="true" />
+                <div class="feed-text">
+                  <p class="feed-title">{a.title}</p>
+                  <p class="feed-detail">{a.detail}</p>
+                </div>
+                <span class="feed-when mono">{a.when}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </article>
+
+  <article class="hiw-row">
+    <div class="hiw-copy rv">
+      <p class="eyebrow hiw-step"><Icon name="zap" size={15} /> Act</p>
+      <h3 class="hiw-title">Then it does the work. With your approval.</h3>
+      <p class="hiw-plan mono"><span class="sr-only">Available on </span>Growth and Scale<sup>1</sup></p>
+      <p class="body hiw-body">
+        Centra AI doesn't just tell you what to do. It can do it: create purchase orders, update prices, send quote
+        follow-ups and create stock transfers. Every action needs your confirmation before anything happens. You stay in
+        control.
+      </p>
+    </div>
+    <div class="hiw-mock rv2">
+      <div class="acts glass-solid">
+        <div class="mock-head mono">
+          <span>Centra AI actions</span>
+          <span>{aiActions.length} available</span>
+        </div>
+        <div class="acts-focus">
+          <div class="acts-row">
+            <span class="acts-icon" aria-hidden="true"><Icon name="cart" size={15} /></span>
+            <span class="acts-name">{firstAction}</span>
+            <span class="acts-tag mono">Needs confirmation</span>
+          </div>
+          <p class="acts-detail">3 products across 2 suppliers. Saved as drafts for your review.</p>
+          <div class="acts-btns" aria-hidden="true">
+            <span class="mock-btn mock-btn-primary">Confirm</span>
+            <span class="mock-btn">Cancel</span>
+          </div>
+        </div>
+        <ul class="acts-list">
+          {
+            otherActions.map((a) => (
+              <li class="acts-row">
+                <span class="acts-icon" aria-hidden="true">
+                  <Icon name="lock" size={14} />
+                </span>
+                <span class="acts-name">{a}</span>
+                <span class="acts-tag mono">Needs confirmation</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </article>
+</div>
+
+<style>
+  .hiw {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(72px, 10vw, 128px);
+  }
+  .hiw-row {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(32px, 6vw, 80px);
+    align-items: center;
+  }
+  .hiw-flip .hiw-mock {
+    order: -1;
+  }
+  .hiw-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hiw-title {
+    margin: 16px 0 0;
+    font-size: clamp(30px, 3.4vw, 44px);
+    line-height: 1.02;
+    letter-spacing: -0.045em;
+    font-weight: 700;
+  }
+  .hiw-plan {
+    display: inline-block;
+    margin: 16px 0 0;
+    padding: 4px 9px;
+    border-radius: 8px;
+    background: rgba(167, 139, 250, 0.15);
+    color: var(--violet-2);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .hiw-body {
+    margin-top: 18px;
+    max-width: 480px;
+  }
+
+  /* Shared mock chrome */
+  .ask,
+  .feed,
+  .acts {
+    border-radius: 24px;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 50px 120px -60px rgba(26, 26, 255, 0.6);
+    overflow: hidden;
+  }
+  .mock-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-4);
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .mock-head-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--green);
+  }
+  .mock-btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .mock-btn-primary {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* Ask */
+  .ask {
+    padding: 14px;
+  }
+  .ask-input {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 10px 10px 12px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(122, 140, 255, 0.45);
+    box-shadow: 0 0 0 4px rgba(91, 108, 255, 0.12);
+  }
+  .ask-input img {
+    display: block;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+  }
+  .ask-placeholder {
+    flex: 1;
+    min-width: 0;
+    color: var(--text-3);
+    font-size: 15px;
+  }
+  .ask-send {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--accent);
+    color: #fff;
+  }
+  .ask-label {
+    margin: 18px 8px 8px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-4);
+  }
+  .ask-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .ask-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 48px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    color: var(--soft);
+    font-size: 15px;
+    line-height: 1.35;
+  }
+  .ask-item.is-on {
+    background: rgba(91, 108, 255, 0.16);
+    color: #fff;
+  }
+  .ask-item :global(.ask-icon) {
+    flex: none;
+    color: var(--text-4);
+  }
+  .ask-item.is-on :global(.ask-icon) {
+    color: var(--accent-4);
+  }
+
+  /* Watch */
+  .feed-list {
+    margin: 0;
+    padding: 6px 8px 8px;
+    list-style: none;
+  }
+  .feed-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px;
+  }
+  .feed-row + .feed-row {
+    border-top: 1px solid rgba(255, 255, 255, 0.055);
+  }
+  .sev {
+    flex: none;
+    width: 9px;
+    height: 9px;
+    margin-top: 6px;
+    border-radius: 50%;
+    background: var(--accent-3);
+  }
+  .sev-red {
+    background: var(--red);
+    box-shadow: 0 0 0 4px rgba(255, 90, 79, 0.16);
+  }
+  .sev-amber {
+    background: var(--amber);
+  }
+  .sev-green {
+    background: var(--green);
+  }
+  .sev-blue {
+    background: #5aa9ff;
+  }
+  .feed-text {
+    flex: 1;
+    min-width: 0;
+  }
+  .feed-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .feed-detail {
+    margin: 2px 0 0;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--text-3);
+  }
+  .feed-when {
+    flex: none;
+    margin-top: 3px;
+    font-size: 11px;
+    color: var(--text-4);
+  }
+
+  /* Act */
+  .acts-focus {
+    margin: 10px;
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(91, 108, 255, 0.1);
+    border: 1px solid rgba(122, 140, 255, 0.4);
+  }
+  .acts-focus .acts-row {
+    padding: 0;
+  }
+  .acts-detail {
+    margin: 10px 0 0 38px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--text-2);
+  }
+  .acts-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 14px 0 0 38px;
+  }
+  .acts-list {
+    margin: 0;
+    padding: 0 8px 8px;
+    list-style: none;
+  }
+  .acts-list .acts-row + .acts-row {
+    border-top: 1px solid rgba(255, 255, 255, 0.055);
+  }
+  .acts-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 50px;
+    padding: 8px 12px;
+  }
+  .acts-icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-3);
+  }
+  .acts-focus .acts-icon {
+    background: var(--accent);
+    color: #fff;
+  }
+  .acts-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+  .acts-tag {
+    flex: none;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: rgba(255, 179, 64, 0.12);
+    color: var(--amber);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 900px) {
+    .hiw-row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .hiw-flip .hiw-mock {
+      order: 0;
+    }
+  }
+  @media (max-width: 520px) {
+    .acts-row {
+      flex-wrap: wrap;
+      row-gap: 6px;
+    }
+    .acts-name {
+      flex-basis: calc(100% - 38px);
+    }
+    .acts-tag {
+      margin-left: 38px;
+    }
+    .acts-detail,
+    .acts-btns {
+      margin-left: 0;
+    }
+  }
+</style>

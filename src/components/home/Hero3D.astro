@@ -196,7 +196,11 @@ const rail = ["Every bin", "What sells", "What's coming", "The fix", "One system
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: rgba(5, 6, 10, 0.55);
+    background: rgba(5, 6, 10, 0.6);
+    transition: opacity 0.9s ease;
+  }
+  [data-chapter="4"] .stage-scrim-sm {
+    opacity: 0.35;
   }
   .stage-fade {
     position: absolute;

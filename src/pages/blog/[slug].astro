@@ -1,0 +1,103 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ArticleHeader from "../../components/article/ArticleHeader.astro";
+import DocLayout from "../../components/article/DocLayout.astro";
+import Longform from "../../components/article/Longform.astro";
+import RelatedCards from "../../components/article/RelatedCards.astro";
+import CtaClosing from "../../components/CtaClosing.astro";
+import ParLevelChart from "../../components/blog/ParLevelChart.astro";
+import { getBlogPosts, type BlogPost } from "../../components/blog/posts";
+import { getHelpArticles, type HelpArticle } from "../../components/help/articles";
+import { monthYear } from "../../components/article/longform";
+import { COMPANY, SITE_URL } from "../../data/site";
+
+export async function getStaticPaths() {
+  const posts = await getBlogPosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+interface Props {
+  post: BlogPost;
+}
+const { post } = Astro.props;
+
+// Components a post can place in its text with <!-- figure:<name> --> on a line of its own.
+const figures = { "par-level": ParLevelChart };
+const isFigure = (name: string): name is keyof typeof figures => name in figures;
+const segments = post.html.split(/<!--\s*figure:([a-z0-9-]+)\s*-->/).map((part, i) => {
+  if (i % 2 === 0) return { html: part };
+  if (!isFigure(part)) throw new Error(`Blog post "${post.id}" asks for an unknown figure "${part}".`);
+  return { Figure: figures[part] };
+});
+
+const helpArticles = await getHelpArticles();
+const related = post.related
+  .map((id) => helpArticles.find((a) => a.id === id))
+  .filter((a): a is HelpArticle => a !== undefined);
+
+const url = `${SITE_URL}${post.url}`;
+const meta = [
+  post.category,
+  monthYear(post.published),
+  ...(post.updated && post.updated !== post.published ? [`Updated ${monthYear(post.updated)}`] : []),
+  `${post.minutes} min read`,
+];
+const organisation = {
+  "@type": "Organization",
+  name: COMPANY.name,
+  legalName: COMPANY.legalName,
+  url: SITE_URL,
+  logo: { "@type": "ImageObject", url: `${SITE_URL}/icon-512.png` },
+};
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: post.title,
+  description: post.description,
+  datePublished: post.published,
+  dateModified: post.updated ?? post.published,
+  articleSection: post.category,
+  inLanguage: "en-NZ",
+  url,
+  mainEntityOfPage: { "@type": "WebPage", "@id": url },
+  author: organisation,
+  publisher: organisation,
+};
+---
+
+<BaseLayout title={post.title} description={post.description} jsonLd={jsonLd} type="article">
+  <ArticleHeader crumbs={[{ label: "Blog", href: "/blog" }]} title={post.title} lead={post.subtitle} meta={meta} />
+
+  <DocLayout headings={post.headings}>
+    {
+      segments.map((segment) => {
+        if ("Figure" in segment && segment.Figure) {
+          const Figure = segment.Figure;
+          return (
+            <div class="post-figure">
+              <Figure />
+            </div>
+          );
+        }
+        return "html" in segment && segment.html.trim() ? <Longform html={segment.html} /> : null;
+      })
+    }
+  </DocLayout>
+
+  <RelatedCards
+    title="Related help articles"
+    items={related.map((r) => ({ href: r.url, label: r.category.title, title: r.title, meta: `${r.minutes} min read` }))}
+  />
+
+  <CtaClosing
+    title='Put your reorder points<br><span class="shine">to work.</span>'
+    lead="Set them once. Centra One checks stock every day, suggests what to order and drafts the purchase orders for you to approve. Free for 30 days, no credit card."
+  />
+</BaseLayout>
+
+<style>
+  .post-figure {
+    max-width: 720px;
+    margin: 12px 0 64px;
+  }
+</style>

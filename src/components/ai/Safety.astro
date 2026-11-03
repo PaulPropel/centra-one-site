@@ -1,0 +1,224 @@
+---
+// /ai Safety: the four guardrails next to a mock of the AI Actions log.
+import Icon, { type IconName } from "../Icon.astro";
+import { guardrails, actionLog, humanOnly } from "../../data/ai";
+
+const reveal = ["rv", "rv2", "rv", "rv2"];
+---
+
+<div class="safety">
+  <ul class="guards">
+    {
+      guardrails.map((g, i) => (
+        <li class:list={["guard", reveal[i]]}>
+          <span class="guard-icon" aria-hidden="true">
+            <Icon name={g.icon as IconName} size={18} />
+          </span>
+          <div>
+            <h3 class="guard-title">{g.title}</h3>
+            <p class="guard-body">{g.body}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="log-wrap rv2">
+    <figure class="log glass-solid">
+      <figcaption class="sr-only">Example entries from the AI Actions log.</figcaption>
+      <div class="log-head mono">
+        <span><Icon name="file" size={13} /> AI Actions log</span>
+        <span>Today</span>
+      </div>
+      <ol class="log-list">
+        {
+          actionLog.map((e) => (
+            <li class="log-row">
+              <span class="log-when mono">{e.when}</span>
+              <div class="log-text">
+                <p class="log-what">{e.what}</p>
+                <p class="log-who">{e.who}</p>
+              </div>
+              <span class:list={["log-result mono", `log-${e.tone}`]}>{e.result}</span>
+            </li>
+          ))
+        }
+      </ol>
+      <div class="log-human">
+        <p class="log-human-label mono">People only</p>
+        <ul class="log-chips">
+          {
+            humanOnly.map((h) => (
+              <li class="chip">
+                <Icon name="lock" size={13} />
+                {h}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </figure>
+  </div>
+</div>
+
+<style>
+  .safety {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: clamp(32px, 6vw, 72px);
+    align-items: center;
+  }
+  .guards {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px 28px;
+  }
+  .guard {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .guard-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(52, 211, 153, 0.12);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+    color: var(--green);
+  }
+  .guard-title {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+  .guard-body {
+    margin: 8px 0 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+
+  .log {
+    margin: 0;
+    border-radius: 24px;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 50px 120px -60px rgba(26, 26, 255, 0.6);
+    overflow: hidden;
+  }
+  .log-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-4);
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .log-head > span:first-child {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-3);
+  }
+  .log-list {
+    margin: 0;
+    padding: 4px 8px;
+    list-style: none;
+  }
+  .log-row {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+    gap: 14px;
+    align-items: start;
+    padding: 14px 12px;
+  }
+  .log-row + .log-row {
+    border-top: 1px solid rgba(255, 255, 255, 0.055);
+  }
+  .log-when {
+    padding-top: 2px;
+    font-size: 12px;
+    color: var(--text-4);
+  }
+  .log-what {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .log-who {
+    margin: 3px 0 0;
+    font-size: 13px;
+    color: var(--text-3);
+  }
+  .log-result {
+    margin-top: 1px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .log-good {
+    background: rgba(52, 211, 153, 0.1);
+    color: var(--green);
+  }
+  .log-muted {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-3);
+  }
+  .log-human {
+    padding: 16px 20px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 90, 79, 0.05);
+  }
+  .log-human-label {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--red-2);
+  }
+  .log-chips {
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .log-chips .chip {
+    color: var(--soft);
+  }
+
+  @media (max-width: 1000px) {
+    .safety {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 560px) {
+    .guards {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 28px;
+    }
+    .log-row {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .log-when {
+      grid-column: 1 / -1;
+      padding-top: 0;
+    }
+  }
+</style>

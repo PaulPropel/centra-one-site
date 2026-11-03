@@ -1,0 +1,795 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import Icon from "../components/Icon.astro";
+import SupportBlock from "../components/help/SupportBlock.astro";
+import { getHelpArticles, plural } from "../components/help/articles";
+import { helpCategories } from "../data/help";
+import { REPLY_TIME, SITE_URL } from "../data/site";
+
+const articles = await getHelpArticles();
+const topics = helpCategories.map((category) => ({
+  category,
+  articles: articles.filter((a) => a.category.slug === category.slug),
+}));
+
+// "Start here": the numbered steps of the getting-started guide, read from its own headings
+// ("Step 1: Complete your company setup (5 minutes)") so the card never drifts from the article.
+const starter = articles.find((a) => a.id === "getting-started/your-first-30-minutes");
+const steps = (starter?.headings ?? []).flatMap((h) => {
+  const m = /^Step (\d+): (.+) \((\d+) minutes?\)$/.exec(h.text);
+  return m ? [{ n: Number(m[1]), task: m[2], minutes: Number(m[3]) }] : [];
+});
+const totalMinutes = steps.reduce((sum, s) => sum + s.minutes, 0);
+
+const words = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+const say = (n: number) => words[n] ?? String(n);
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+const suggestions = ["Xero", "Purchase order", "Reorder point", "Permissions"];
+const reveal = ["rv", "rv2", "rv3"];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "Centra One help centre",
+  url: `${SITE_URL}/help`,
+  hasPart: articles.map((a) => ({ "@type": "Article", headline: a.title, url: `${SITE_URL}${a.url}` })),
+};
+---
+
+<BaseLayout
+  title="Help centre"
+  description="Step-by-step guides for setting up and running Centra One: products, purchasing, Xero, Centra AI and team permissions. Search them or browse by topic."
+  jsonLd={jsonLd}
+>
+  <PageHeader
+    eyebrow="Help centre"
+    title="How can we help?"
+    lead="Guides for setting up and running Centra One. Search them, or browse by topic below."
+  >
+    <form class="search" role="search" action="/help" method="get" data-help-search>
+      <label class="sr-only" for="help-q">Search help articles</label>
+      <div class="search-field">
+        <Icon name="search" size={22} class="search-icon" />
+        <input
+          id="help-q"
+          class="search-input"
+          type="search"
+          name="search"
+          placeholder="Search help articles"
+          autocomplete="off"
+          spellcheck="false"
+          enterkeyhint="search"
+          data-help-q
+        />
+        <button type="button" class="search-clear" aria-label="Clear search" hidden data-help-clear>
+          <Icon name="x" size={18} />
+        </button>
+      </div>
+      <div class="search-try">
+        <span class="fine search-try-label">Try</span>
+        {
+          suggestions.map((s) => (
+            <button type="button" class="search-chip" data-help-try={s}>
+              {s}
+            </button>
+          ))
+        }
+      </div>
+    </form>
+    <noscript><style is:inline>[data-help-search]{display:none!important}</style></noscript>
+  </PageHeader>
+
+  <section class="results" aria-labelledby="results-status" data-help-results hidden>
+    <div class="container">
+      <p id="results-status" class="results-status mono" role="status" data-help-status></p>
+      <ol class="results-list">
+        {
+          articles.map((a, i) => (
+            <li
+              class="result"
+              hidden
+              data-help-item
+              data-index={i}
+              data-title={a.title}
+              data-summary={a.summary}
+              data-category={a.category.title}
+              data-text={a.text}
+            >
+              <a class="result-link" href={a.url}>
+                <span class="result-cat fine">{a.category.title}</span>
+                <span class="result-title" data-help-title>
+                  {a.title}
+                </span>
+                <span class="result-snippet" data-help-snippet>
+                  {a.summary}
+                </span>
+                <span class="result-meta fine">{a.minutes} min read</span>
+                <Icon name="arrow-right" size={20} class="result-arrow" />
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+      <div class="results-empty glass" data-help-empty hidden>
+        <p class="results-empty-title">No guides match <span data-help-echo></span>.</p>
+        <p class="body">Try fewer or different words, or ask our support team. We reply {REPLY_TIME}.</p>
+        <div class="btn-row mt-24">
+          <a class="btn btn-secondary" href="/contact?kind=support#form">Contact support</a>
+          <button type="button" class="btn btn-ghost" data-help-reset>Clear search</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div data-help-browse>
+    {
+      starter && steps.length > 0 && (
+        <section class="start-section" aria-labelledby="start-title">
+          <div class="container">
+            <article class="glass pad-lg start rv">
+              <div class="start-copy">
+                <p class="eyebrow">Start here</p>
+                <h2 id="start-title" class="start-title">
+                  Your first 30 minutes.
+                </h2>
+                <p class="body mt-16">
+                  Company details, warehouses, products, suppliers, customers and opening stock. Do them in this order
+                  and you're ready for your first purchase order and sales order.
+                </p>
+                <a class="btn btn-secondary mt-32" href={starter.url}>
+                  Read the guide
+                </a>
+              </div>
+              <div class="start-table mono">
+                <div class="start-row start-head" aria-hidden="true">
+                  <span>STEP</span>
+                  <span>TASK</span>
+                  <span>TIME</span>
+                </div>
+                <ol class="start-list" aria-label="Steps in the guide">
+                  {steps.map((s) => (
+                    <li class="start-row">
+                      <span class="start-n">{String(s.n).padStart(2, "0")}</span>
+                      <span class="start-task">{s.task}</span>
+                      <span class="start-min">
+                        {s.minutes}
+                        <span class="sr-only"> minutes</span>
+                        <span aria-hidden="true"> MIN</span>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+                <p class="start-note">
+                  <span class="dot" aria-hidden="true" />
+                  READY IN {totalMinutes} MINUTES
+                </p>
+              </div>
+            </article>
+          </div>
+        </section>
+      )
+    }
+
+    <section id="topics" class="section topics-section" aria-labelledby="topics-title">
+      <div class="grid-bg" aria-hidden="true"></div>
+      <div class="container relative">
+        <p class="eyebrow rv">Browse by topic</p>
+        <h2 id="topics-title" class="h2 rv mt-24">Find it by topic.<br /><span class="dim">Or ask us.</span></h2>
+        <p class="lead rv2 mt-24">
+          {cap(say(articles.length))} guides so far, each filed under the topic it helps with. Where a topic doesn't have a
+          guide yet, our support team will help you directly.
+        </p>
+
+        <div class="grid-auto topics mt-48">
+          {
+            topics.map(({ category, articles: list }, i) => (
+              <article
+                class:list={["topic", reveal[i % 3], { "topic-empty": list.length === 0 }]}
+                id={category.slug}
+                aria-labelledby={`topic-${category.slug}`}
+              >
+                <div class="topic-top">
+                  <span class="topic-icon">
+                    <Icon name={category.icon} size={20} />
+                  </span>
+                  <span class="topic-count mono">
+                    {list.length > 0 ? plural(list.length, "article", "articles") : "No articles yet"}
+                  </span>
+                </div>
+                <h3 class="topic-title" id={`topic-${category.slug}`}>
+                  {category.title}
+                </h3>
+                <p class="topic-desc">{category.description}</p>
+                {list.length > 0 ? (
+                  <ul class="topic-links">
+                    {list.map((a) => (
+                      <li>
+                        <a href={a.url}>
+                          <span>{a.title}</span>
+                          <Icon name="arrow-right" size={16} />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p class="topic-empty-note">
+                    No guides here yet. <a href="/contact?kind=support#form">Ask support</a> and we'll help directly.
+                  </p>
+                )}
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <SupportBlock />
+</BaseLayout>
+
+<style>
+  /* ---------- Search ---------- */
+  .search {
+    max-width: 760px;
+  }
+  .search-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-radius: 20px;
+    background: rgba(14, 16, 28, 0.72);
+    border: 1px solid var(--line-2);
+    box-shadow: 0 30px 80px -40px rgba(26, 26, 255, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .search-field:focus-within {
+    border-color: rgba(139, 155, 255, 0.85);
+    box-shadow: 0 0 0 4px rgba(91, 108, 255, 0.22), 0 30px 90px -36px rgba(26, 26, 255, 0.95);
+  }
+  .search-field :global(.search-icon) {
+    position: absolute;
+    left: 22px;
+    color: var(--accent-3);
+    pointer-events: none;
+  }
+  .search-input {
+    width: 100%;
+    min-height: 68px;
+    padding: 0 60px 0 60px;
+    border: 0;
+    border-radius: 20px;
+    background: transparent;
+    color: var(--text);
+    font: 500 19px/1.3 var(--font-sans);
+    letter-spacing: -0.015em;
+    outline: none;
+  }
+  .search-input::placeholder {
+    color: var(--text-4);
+  }
+  .search-input::-webkit-search-cancel-button,
+  .search-input::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .search-clear {
+    position: absolute;
+    right: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-2);
+    cursor: pointer;
+  }
+  .search-clear:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text);
+  }
+  .search-clear[hidden] {
+    display: none;
+  }
+  .search-try {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .search-try-label {
+    margin-right: 4px;
+    color: var(--text-4);
+  }
+  .search-chip {
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--soft);
+    font: 500 14px/1 var(--font-sans);
+    cursor: pointer;
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+  }
+  .search-chip:hover {
+    border-color: rgba(255, 255, 255, 0.24);
+    color: var(--text);
+  }
+
+  /* ---------- Results ---------- */
+  .results {
+    padding-block: 8px clamp(64px, 8vw, 104px);
+  }
+  .results[hidden] {
+    display: none;
+  }
+  .results-status {
+    margin: 0 0 20px;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .results-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+  }
+  .result {
+    border-bottom: 1px solid var(--line);
+  }
+  .result[hidden] {
+    display: none;
+  }
+  .result-link {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 24px;
+    padding: 24px 56px 24px 0;
+    color: var(--text);
+  }
+  .result-link:hover .result-title {
+    color: var(--accent-4);
+  }
+  .result-cat {
+    grid-column: 1;
+    color: var(--accent-3);
+  }
+  .result-title {
+    grid-column: 1;
+    font-size: clamp(20px, 2vw, 24px);
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+    font-weight: 700;
+    transition: color 0.2s ease;
+  }
+  .result-snippet {
+    grid-column: 1;
+    max-width: 720px;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+  .result-meta {
+    grid-column: 2;
+    grid-row: 1;
+    color: var(--text-4);
+  }
+  .result-link :global(.result-arrow) {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    margin-top: -10px;
+    color: var(--accent-3);
+    transition: transform 0.3s var(--ease-out);
+  }
+  .result-link:hover :global(.result-arrow) {
+    transform: translateX(4px);
+  }
+  .results :global(mark) {
+    padding: 0 2px;
+    border-radius: 4px;
+    background: rgba(91, 108, 255, 0.32);
+    color: #fff;
+  }
+  .results-empty {
+    padding: clamp(24px, 4vw, 40px);
+  }
+  .results-empty[hidden] {
+    display: none;
+  }
+  .results-empty-title {
+    margin: 0 0 10px;
+    font-size: 24px;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  /* ---------- Start here ---------- */
+  .start-section {
+    padding-block: 8px 0;
+  }
+  .start {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: clamp(28px, 4vw, 48px);
+  }
+  .start-copy {
+    flex: 1 1 320px;
+    min-width: 0;
+  }
+  .start-title {
+    margin: 12px 0 0;
+    font-size: clamp(32px, 3.8vw, 52px);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-weight: 700;
+  }
+  .start-copy .body {
+    max-width: 440px;
+  }
+  .start-table {
+    flex: 1 1 420px;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: rgba(5, 6, 10, 0.35);
+    font-size: 13px;
+  }
+  .start-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .start-row {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr) 72px;
+    gap: 8px;
+    align-items: center;
+    padding: 13px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--soft);
+  }
+  .start-head {
+    border-top: 0;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-4);
+    font-size: 11px;
+  }
+  .start-n {
+    color: var(--accent-3);
+  }
+  .start-min,
+  .start-head span:last-child {
+    text-align: right;
+  }
+  .start-note {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 13px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(91, 108, 255, 0.1);
+    color: var(--accent-4);
+  }
+
+  /* ---------- Topics ---------- */
+  .topics-section {
+    padding-top: clamp(80px, 10vw, 128px);
+    padding-bottom: clamp(8px, 2vw, 24px);
+  }
+  .topic {
+    display: flex;
+    flex-direction: column;
+    min-height: 260px;
+    padding: 28px;
+    border-radius: var(--radius-xl);
+    background: var(--glass);
+    border: 1px solid var(--line);
+    scroll-margin-top: 104px;
+  }
+  .topic-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .topic-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: rgba(91, 108, 255, 0.14);
+    border: 1px solid rgba(91, 108, 255, 0.3);
+    color: var(--accent-4);
+  }
+  .topic-count {
+    padding: 5px 10px;
+    border-radius: 980px;
+    background: rgba(91, 108, 255, 0.16);
+    color: var(--accent-4);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .topic-title {
+    margin: 22px 0 0;
+    font-size: 24px;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+  }
+  .topic-desc {
+    margin: 8px 0 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-3);
+  }
+  .topic-links {
+    margin: auto 0 0;
+    padding: 20px 0 0;
+    list-style: none;
+  }
+  .topic-links a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 44px;
+    padding: 12px 0 0;
+    border-top: 1px solid var(--line);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text);
+  }
+  .topic-links a :global(svg) {
+    flex: none;
+    color: var(--accent-3);
+    transition: transform 0.3s var(--ease-out);
+  }
+  .topic-links a:hover {
+    color: var(--accent-4);
+  }
+  .topic-links a:hover :global(svg) {
+    transform: translateX(3px);
+  }
+  .topic-empty {
+    background: rgba(255, 255, 255, 0.015);
+  }
+  .topic-empty .topic-icon {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--line);
+    color: var(--text-3);
+  }
+  .topic-empty .topic-count {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-3);
+  }
+  .topic-empty-note {
+    margin: auto 0 0;
+    padding-top: 20px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-2);
+  }
+
+  @media (max-width: 560px) {
+    .search-input {
+      min-height: 60px;
+      padding: 0 52px 0 52px;
+      font-size: 17px;
+    }
+    .search-field :global(.search-icon) {
+      left: 18px;
+    }
+    .result-link {
+      grid-template-columns: minmax(0, 1fr);
+      padding-right: 36px;
+    }
+    .result-meta {
+      grid-column: 1;
+      grid-row: auto;
+    }
+    .start-row {
+      grid-template-columns: 36px minmax(0, 1fr) 60px;
+      padding: 12px 14px;
+    }
+  }
+</style>
+
+<script>
+  // Client-side search over every article's title, summary, topic and text. Reads ?search=
+  // (the 404 page links to /help?search=<q>) and keeps the URL in step as you type.
+  const form = document.querySelector<HTMLFormElement>("[data-help-search]");
+  const input = document.querySelector<HTMLInputElement>("[data-help-q]");
+  const clear = document.querySelector<HTMLButtonElement>("[data-help-clear]");
+  const results = document.querySelector<HTMLElement>("[data-help-results]");
+  const status = document.querySelector<HTMLElement>("[data-help-status]");
+  const empty = document.querySelector<HTMLElement>("[data-help-empty]");
+  const echo = document.querySelector<HTMLElement>("[data-help-echo]");
+  const browse = document.querySelector<HTMLElement>("[data-help-browse]");
+  const list = results?.querySelector<HTMLOListElement>(".results-list");
+  const items = Array.from(document.querySelectorAll<HTMLLIElement>("[data-help-item]"));
+
+  const STOP = new Set(
+    "a an and are as at be by can do does for from get how i in into is it me my of on or our that the this to we what when where which who why will with you your".split(
+      " ",
+    ),
+  );
+
+  /** Lower-cased words worth matching; a trailing "s" is dropped so "orders" finds "order". */
+  const termsOf = (q: string): string[] => {
+    const words = q
+      .toLowerCase()
+      .split(/[^\p{L}\p{N}]+/u)
+      .filter((w) => w.length > 1 && !STOP.has(w))
+      .map((w) => (w.length > 3 && w.endsWith("s") && !w.endsWith("ss") ? w.slice(0, -1) : w));
+    const unique = [...new Set(words)];
+    return unique.length ? unique : q.trim() ? [q.trim().toLowerCase()] : [];
+  };
+
+  const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  /** Writes `text` into `el`, wrapping matches in <mark>. Built with text nodes, never innerHTML. */
+  const paint = (el: HTMLElement, text: string, terms: string[]) => {
+    el.textContent = "";
+    if (!terms.length) {
+      el.textContent = text;
+      return;
+    }
+    const parts = text.split(new RegExp(`(${terms.map(escapeRe).join("|")})`, "gi"));
+    parts.forEach((part, i) => {
+      if (!part) return;
+      if (i % 2 === 1) {
+        const mark = document.createElement("mark");
+        mark.textContent = part;
+        el.append(mark);
+      } else {
+        el.append(document.createTextNode(part));
+      }
+    });
+  };
+
+  /** A short passage of the article around the first match, for results found in the body. */
+  const snippetOf = (text: string, term: string): string => {
+    const at = text.toLowerCase().indexOf(term);
+    if (at < 0) return "";
+    let start = Math.max(0, at - 70);
+    let end = Math.min(text.length, at + term.length + 110);
+    if (start > 0) start = text.indexOf(" ", start) + 1 || start;
+    if (end < text.length) end = text.lastIndexOf(" ", end) > at ? text.lastIndexOf(" ", end) : end;
+    return `${start > 0 ? "…" : ""}${text.slice(start, end).trim()}${end < text.length ? "…" : ""}`;
+  };
+
+  if (form && input && clear && results && status && empty && echo && browse && list && items.length) {
+    const data = items.map((li) => ({
+      li,
+      index: Number(li.dataset.index),
+      title: li.dataset.title ?? "",
+      summary: li.dataset.summary ?? "",
+      category: li.dataset.category ?? "",
+      text: li.dataset.text ?? "",
+      titleEl: li.querySelector<HTMLElement>("[data-help-title]"),
+      snippetEl: li.querySelector<HTMLElement>("[data-help-snippet]"),
+    }));
+
+    let urlTimer = 0;
+    const syncUrl = (q: string) => {
+      window.clearTimeout(urlTimer);
+      urlTimer = window.setTimeout(() => {
+        const url = new URL(window.location.href);
+        if (q) url.searchParams.set("search", q);
+        else url.searchParams.delete("search");
+        history.replaceState(history.state, "", `${url.pathname}${url.search}${url.hash}`);
+      }, 300);
+    };
+
+    const run = (raw: string, updateUrl = true) => {
+      const q = raw.trim();
+      clear.hidden = raw.length === 0;
+      if (updateUrl) syncUrl(q);
+
+      if (!q) {
+        results.hidden = true;
+        browse.hidden = false;
+        status.textContent = "";
+        return;
+      }
+
+      const terms = termsOf(q);
+      const scored = data
+        .map((d) => {
+          const title = d.title.toLowerCase();
+          const meta = `${d.summary} ${d.category}`.toLowerCase();
+          const body = d.text.toLowerCase();
+          let score = 0;
+          let all = true;
+          for (const t of terms) {
+            const s = (title.includes(t) ? 6 : 0) + (meta.includes(t) ? 3 : 0) + (body.includes(t) ? 1 : 0);
+            if (!s) all = false;
+            score += s;
+          }
+          return { d, score: all ? score : 0 };
+        })
+        .filter((r) => r.score > 0)
+        .sort((a, b) => b.score - a.score || a.d.index - b.d.index);
+
+      for (const d of data) d.li.hidden = true;
+      for (const { d } of scored) {
+        d.li.hidden = false;
+        list.append(d.li); // best match first
+        if (d.titleEl) paint(d.titleEl, d.title, terms);
+        if (d.snippetEl) {
+          const inSummary = terms.some((t) => d.summary.toLowerCase().includes(t));
+          const bodyTerm = terms.find((t) => d.text.toLowerCase().includes(t));
+          const snippet = !inSummary && bodyTerm ? snippetOf(d.text, bodyTerm) : "";
+          paint(d.snippetEl, snippet || d.summary, terms);
+        }
+      }
+
+      const n = scored.length;
+      status.textContent = n ? `${n} ${n === 1 ? "result" : "results"} for “${q}”` : `No results for “${q}”`;
+      status.classList.toggle("sr-only", n === 0); // the empty-state panel says it visibly
+      echo.textContent = `“${q}”`;
+      empty.hidden = n > 0;
+      list.hidden = n === 0;
+      results.hidden = false;
+      browse.hidden = true;
+    };
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      run(input.value);
+    });
+    input.addEventListener("input", () => run(input.value));
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && input.value) {
+        e.preventDefault();
+        input.value = "";
+        run("");
+      }
+    });
+    clear.addEventListener("click", () => {
+      input.value = "";
+      run("");
+      input.focus();
+    });
+    document.querySelector("[data-help-reset]")?.addEventListener("click", () => {
+      input.value = "";
+      run("");
+      input.focus();
+    });
+    form.querySelectorAll<HTMLButtonElement>("[data-help-try]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        input.value = btn.dataset.helpTry ?? "";
+        run(input.value);
+        input.focus();
+      });
+    });
+
+    const initial = new URLSearchParams(window.location.search).get("search");
+    if (initial) {
+      input.value = initial;
+      run(initial, false);
+    }
+  }
+</script>

@@ -1,0 +1,251 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import CtaClosing from "../components/CtaClosing.astro";
+import ChatDemo from "../components/ChatDemo.astro";
+import FaqList from "../components/FaqList.astro";
+import Icon from "../components/Icon.astro";
+import HowItWorks from "../components/ai/HowItWorks.astro";
+import GrowthIntel from "../components/ai/GrowthIntel.astro";
+import Safety from "../components/ai/Safety.astro";
+import CompareTable from "../components/pricing/CompareTable.astro";
+import { aiFaq, aiCompare, alertCountLabel } from "../data/ai";
+import { AI_ACTIONS_FOOTNOTE } from "../data/pricing";
+import { SIGNUP_URL } from "../data/site";
+
+const no = { text: "No", tone: "no" as const };
+const compareRows = aiCompare.map((r) => ({
+  feature: r.capability,
+  cells: [{ text: r.centra, tone: "own" as const, growth: r.growth, footnote: r.growth ? 1 : undefined }, no, no],
+}));
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: aiFaq.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a.replace(/<[^>]+>/g, "") },
+  })),
+};
+
+const tiles = [
+  {
+    icon: "database",
+    title: "Complete business context",
+    body: "Every answer is grounded in your actual data: real product names, real stock levels, real customer history. Not generic advice.",
+    k: "SCOPE",
+    v: "WHOLE BUSINESS",
+  },
+  {
+    icon: "refresh",
+    title: "Always current",
+    body: "Business context refreshes automatically. Ask about stock at 9am or 9pm and the answer reflects what's happening now.",
+    k: "CONTEXT",
+    v: "LIVE",
+  },
+  {
+    icon: "lock",
+    title: "Your data stays yours",
+    body: "Your business data is never used to train AI models. It's only used to answer your questions.",
+    k: "TRAINING",
+    v: "NEVER",
+  },
+  {
+    icon: "sparkles",
+    title: "Powered by Claude",
+    body: "Centra AI runs on Claude, the AI model made by Anthropic. We built the wholesale knowledge and the guardrails around it.",
+    k: "MODEL",
+    v: "CLAUDE",
+  },
+] as const;
+const reveal = ["rv", "rv2", "rv3", "rv3"];
+---
+
+<BaseLayout
+  title="Centra AI: AI that knows your wholesale business"
+  description="Centra AI answers questions from your live wholesale data and watches stock, orders and invoices 24/7. On Growth and Scale it acts too, with your approval."
+  footnotes={[AI_ACTIONS_FOOTNOTE]}
+  notes={["Product screens and figures are illustrative."]}
+  jsonLd={jsonLd}
+>
+  <PageHeader
+    eyebrow="Centra AI"
+    title='AI that actually knows your business.<br><span class="dim">It runs on your live data.</span>'
+    lead="Centra AI sees your inventory, orders, customers and finances. It answers questions from your real data and watches the business around the clock, so you hear about problems while there's still time to fix them."
+  >
+    <div class="btn-row">
+      <a class="btn btn-primary" href={SIGNUP_URL}>Start free trial</a>
+      <a class="btn btn-secondary" href="#demo">
+        Try the demo
+        <Icon name="arrow-down" size={15} stroke={2.4} />
+      </a>
+    </div>
+    <ul class="chips hero-chips mt-24">
+      <li class="chip"><span class="live hero-live" aria-hidden="true"></span>24/7 business monitoring</li>
+      <li class="chip">Powered by Claude</li>
+      <li class="chip">Takes action, not just advice<sup>1</sup></li>
+    </ul>
+  </PageHeader>
+
+  <section id="demo" class="section-tight demo">
+    <div class="container">
+      <ChatDemo ids={["focus", "reorder", "stock", "all-pos", "quiet"]} footnote={1}>
+        <p class="eyebrow rv">Try it</p>
+        <h2 class="h1 rv mt-24">Pick a question.</h2>
+        <p class="lead rv2 mt-24">
+          These answers come from a sample wholesale business. In your account, they come from yours.
+        </p>
+      </ChatDemo>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow rv">How it works</p>
+      <h2 class="h2 rv mt-24">Ask. Watch. Act.<br /><span class="dim">Three ways it works for you.</span></h2>
+      <div class="mt-64">
+        <HowItWorks />
+      </div>
+    </div>
+  </section>
+
+  <section class="section grounded">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="container relative">
+      <p class="eyebrow rv">Grounded in your data</p>
+      <h2 class="h2 rv mt-24">How it knows<br /><span class="dim">your business.</span></h2>
+      <p class="lead rv2 mt-24">Unlike generic AI tools, Centra AI is connected to your live business data.</p>
+      <div class="grid-auto-sm mt-48">
+        {
+          tiles.map((t, i) => (
+            <article class:list={["tile", "ground-tile", reveal[i]]}>
+              <span class="ground-icon" aria-hidden="true">
+                <Icon name={t.icon} size={18} />
+              </span>
+              <h3 class="ground-title">{t.title}</h3>
+              <p class="ground-body">{t.body}</p>
+              <p class="data ground-data" aria-hidden="true">
+                <span>{t.k}</span>
+                <span>{t.v}</span>
+              </p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow rv">Growth Intel</p>
+      <h2 class="h2 rv mt-24">Your early warning system.<br /><span class="dim">On from day one.</span></h2>
+      <p class="lead rv2 mt-24">
+        {alertCountLabel} automated alerts watch your business and surface what needs attention. No setup required.
+      </p>
+      <div class="mt-48">
+        <GrowthIntel />
+      </div>
+      <p class="fine center mt-32 rv">
+        Every Growth Intel alert works out of the box. Connect your data and the monitoring starts straight away.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow rv">Safety</p>
+      <h2 class="h2 rv mt-24">AI that acts.<br /><span class="dim">With guardrails.</span></h2>
+      <p class="lead rv2 mt-24">
+        We built Centra AI with four layers of safety, so you can trust it with your business.
+      </p>
+      <div class="mt-64">
+        <Safety />
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="container">
+      <p class="eyebrow rv">Comparison</p>
+      <h2 class="h2 rv mt-24">How Centra AI<br /><span class="dim">compares.</span></h2>
+      <div class="compare-wrap mt-48 rv2">
+        <CompareTable
+          label="Centra AI compared with generic AI chat tools and no AI"
+          first="Capability"
+          columns={["Centra AI", "Generic AI chat", "No AI"]}
+          rows={compareRows}
+        />
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="container container-narrow">
+      <p class="eyebrow center rv">Questions</p>
+      <h2 class="h2 center rv mt-24">Fair questions.<br /><span class="dim">Straight answers.</span></h2>
+      <FaqList items={aiFaq} openFirst class="mt-48" />
+    </div>
+  </section>
+
+  <CtaClosing
+    title='AI that works as hard <span class="shine">as you do.</span>'
+    lead="The Centra AI assistant comes with every plan, at no extra cost. Growth and Scale add actions."
+    fine="Assistant on every plan · Actions on Growth and Scale"
+  />
+</BaseLayout>
+
+<style>
+  .hero-chips {
+    margin: 24px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .hero-chips .chip {
+    font-size: 12px;
+  }
+  .hero-live {
+    color: var(--green);
+  }
+  .demo {
+    padding-top: clamp(24px, 4vw, 48px);
+  }
+
+  .ground-tile {
+    min-height: 0;
+    gap: 0;
+  }
+  .ground-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(91, 108, 255, 0.14);
+    color: var(--accent-4);
+  }
+  .ground-title {
+    margin: 22px 0 0;
+    font-size: 21px;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    font-weight: 700;
+  }
+  .ground-body {
+    margin: 10px 0 24px;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+  .ground-data {
+    margin-top: auto;
+  }
+
+  .compare-wrap {
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.015);
+  }
+</style>

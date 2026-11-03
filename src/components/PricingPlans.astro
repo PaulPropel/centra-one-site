@@ -46,10 +46,11 @@ const finderData = JSON.stringify(bands.map((b) => ({ ...b, note: finderNotes[b.
           data-bands={finderData}
         />
         <div class="finder-scale mono" aria-hidden="true">
-          <span>UNDER $1M</span>
-          <span>$1M</span>
-          <span>$2.5M</span>
-          <span>$5M+</span>
+          {
+            ["UNDER $1M", "$1M", "$2.5M", "$5M+"].map((label, i) => (
+              <span style={`--i: ${i}`}>{label}</span>
+            ))
+          }
         </div>
         <p class="finder-note" data-finder-note>{finderNotes[bands[startIndex].plan]}</p>
       </div>
@@ -178,11 +179,28 @@ const finderData = JSON.stringify(bands.map((b) => ({ ...b, note: finderNotes[b.
   .finder-range:focus-visible::-moz-range-thumb {
     box-shadow: 0 0 0 9px rgba(91, 108, 255, 0.45), 0 6px 18px rgba(0, 0, 0, 0.45);
   }
+  /* Labels sit under the four thumb positions (the thumb is 24px wide). */
   .finder-scale {
-    display: flex;
-    justify-content: space-between;
+    position: relative;
+    height: 16px;
     font-size: 11px;
     color: var(--text-4);
+  }
+  .finder-scale span {
+    position: absolute;
+    top: 0;
+    left: calc(12px + (100% - 24px) * var(--i) / 3);
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+  .finder-scale span:first-child {
+    left: 0;
+    transform: none;
+  }
+  .finder-scale span:last-child {
+    left: auto;
+    right: 0;
+    transform: none;
   }
   .finder-note {
     margin: 16px 0 0;

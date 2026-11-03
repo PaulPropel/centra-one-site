@@ -1,0 +1,238 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import FaqList from "../components/FaqList.astro";
+import Icon from "../components/Icon.astro";
+import EnquiryForm from "../components/contact/EnquiryForm.astro";
+import { contactFaq } from "../data/contact";
+import { AI_ACTIONS_FOOTNOTE, PRICING_FOOTNOTE, TRIAL_DAYS } from "../data/pricing";
+import { SITE_URL, COMPANY, EMAIL, LOGIN_URL, SIGNUP_URL } from "../data/site";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  name: "Contact Centra One",
+  url: `${SITE_URL}/contact`,
+  mainEntity: {
+    "@type": "Organization",
+    name: COMPANY.name,
+    legalName: COMPANY.legalName,
+    url: SITE_URL,
+    logo: `${SITE_URL}/icon-512.png`,
+    email: EMAIL.hello,
+    areaServed: ["NZ", "AU"],
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        contactType: "sales",
+        email: EMAIL.hello,
+        url: `${SITE_URL}/contact`,
+        areaServed: ["NZ", "AU"],
+        availableLanguage: ["English"],
+      },
+      {
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        email: EMAIL.support,
+        url: `${SITE_URL}/contact?kind=support`,
+        areaServed: ["NZ", "AU"],
+        availableLanguage: ["English"],
+      },
+    ],
+  },
+};
+---
+
+<BaseLayout
+  title="Contact"
+  description="Book a walkthrough, ask about pricing or get help. A real person replies within one business day. Or start a free trial, no credit card needed."
+  jsonLd={jsonLd}
+  footnotes={[AI_ACTIONS_FOOTNOTE]}
+  notes={[PRICING_FOOTNOTE]}
+>
+  <PageHeader
+    eyebrow="Contact"
+    title='Talk to someone who<br><span class="dim">knows wholesale.</span>'
+    lead="Tell us what you need and we'll point you at the right person. Or skip the conversation and start a free trial."
+  />
+
+  <section class="contact-main" aria-labelledby="enquiry-title">
+    <div class="container contact-grid">
+      <div class="contact-form">
+        <h2 class="sr-only" id="enquiry-title">Send us an enquiry</h2>
+        <EnquiryForm />
+      </div>
+
+      <aside class="contact-aside" aria-label="Other ways to reach us">
+        <div class="aside-card">
+          <span class="aside-icon"><Icon name="mail" size={18} /></span>
+          <h2 class="aside-title">Email us directly</h2>
+          <p class="aside-text">Prefer email? Reach us at <a href={`mailto:${EMAIL.hello}`}>{EMAIL.hello}</a>.</p>
+        </div>
+        <div class="aside-card">
+          <span class="aside-icon"><Icon name="login" size={18} /></span>
+          <h2 class="aside-title">Existing customer?</h2>
+          <p class="aside-text">
+            Support is fastest from inside the platform, where Centra AI can answer most day-to-day questions straight
+            away. You can also email <a href={`mailto:${EMAIL.support}`}>{EMAIL.support}</a>.
+          </p>
+          <a class="aside-link" href={LOGIN_URL}>Sign in to Centra One <span aria-hidden="true">→</span></a>
+        </div>
+        <p class="fine aside-fine">{COMPANY.legalName} · New Zealand</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section-tight selfserve-section">
+    <div class="container">
+      <div class="selfserve rv">
+        <div class="selfserve-glow" aria-hidden="true"></div>
+        <div class="selfserve-copy">
+          <h2 class="h3">You don't have to talk to us at all.</h2>
+          <p class="body mt-16">
+            Every plan is self-serve. Start a {TRIAL_DAYS}-day free trial without a card, import your product list, and
+            see it running on your own numbers. Talk to us only if you want to.
+          </p>
+        </div>
+        <div class="selfserve-cta">
+          <a class="btn btn-primary" href={SIGNUP_URL}>Start free trial</a>
+          <p class="fine">{TRIAL_DAYS} days free · No credit card</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" class="section-tight faq-section">
+    <div class="container container-narrow">
+      <div class="center">
+        <p class="eyebrow rv">Quick answers</p>
+        <h2 class="h1 rv mt-24">Might save you<br /><span class="dim">an email.</span></h2>
+      </div>
+      <FaqList items={contactFaq} openFirst class="mt-48" />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .contact-main {
+    position: relative;
+    padding-bottom: clamp(56px, 7vw, 88px);
+  }
+  .contact-grid {
+    display: grid;
+    gap: 20px;
+    align-items: start;
+  }
+  .contact-form {
+    min-width: 0;
+  }
+  @media (min-width: 980px) {
+    .contact-grid {
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 24px;
+    }
+    .contact-aside {
+      position: sticky;
+      top: 112px;
+    }
+  }
+
+  /* ---------- Aside ---------- */
+  .contact-aside {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+    gap: 12px;
+  }
+  .aside-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--line);
+  }
+  .aside-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    background: rgba(91, 108, 255, 0.14);
+    color: var(--accent-4);
+  }
+  .aside-title {
+    margin: 16px 0 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+  .aside-text {
+    margin: 8px 0 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-2);
+    overflow-wrap: anywhere;
+  }
+  .aside-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    margin-top: 6px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .aside-fine {
+    align-self: center;
+    padding: 8px 4px 0;
+    color: var(--text-4);
+  }
+
+  /* ---------- Self-serve banner ---------- */
+  .selfserve-section {
+    padding-top: 0;
+  }
+  .selfserve {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px 48px;
+    padding: clamp(28px, 4.4vw, 52px);
+    border-radius: var(--radius-xl);
+    background: var(--glass);
+    border: 1px solid rgba(91, 108, 255, 0.28);
+  }
+  .selfserve-glow {
+    position: absolute;
+    right: -120px;
+    top: -160px;
+    width: 520px;
+    height: 520px;
+    pointer-events: none;
+    background: radial-gradient(closest-side, rgba(26, 26, 255, 0.4), rgba(26, 26, 255, 0));
+    filter: blur(8px);
+  }
+  .selfserve-copy {
+    position: relative;
+    flex: 1 1 420px;
+    min-width: 0;
+    max-width: 640px;
+  }
+  .selfserve-cta {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .faq-section {
+    padding-top: clamp(48px, 6vw, 80px);
+  }
+</style>

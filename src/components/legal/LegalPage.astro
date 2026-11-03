@@ -1,0 +1,256 @@
+---
+// Layout for the legal pages (/privacy, /terms): page header, then the document in .prose
+// with a table of contents. On wide screens the contents list is sticky beside the text and
+// highlights the section you're reading; on small screens it's a plain list above the text.
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../PageHeader.astro";
+import { SITE_URL, COMPANY } from "../../data/site";
+import type { LegalDoc } from "./types";
+
+interface Props {
+  doc: LegalDoc;
+}
+const { doc } = Astro.props;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: `${doc.title} · ${COMPANY.name}`,
+  url: `${SITE_URL}${doc.path}`,
+  description: doc.description,
+  inLanguage: "en-NZ",
+  dateModified: doc.updatedIso,
+  publisher: { "@type": "Organization", name: COMPANY.legalName, url: SITE_URL },
+};
+---
+
+<BaseLayout title={doc.title} description={doc.description} jsonLd={jsonLd}>
+  <PageHeader eyebrow="Legal" title={doc.title} lead={doc.intro}>
+    <p class="fine">Last updated <time datetime={doc.updatedIso}>{doc.updated}</time></p>
+  </PageHeader>
+
+  <div class="container legal" data-legal>
+    <nav class="legal-toc" aria-labelledby="legal-toc-title">
+      <p class="label" id="legal-toc-title">On this page</p>
+      <ol>
+        {
+          doc.sections.map((s) => (
+            <li>
+              <a href={`#${s.id}`} data-toc={s.id}>
+                <span class="toc-bar" aria-hidden="true" />
+                <span>{s.title}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="legal-related">
+        Also read: <a href={doc.related.href}>{doc.related.label}</a>
+      </p>
+    </nav>
+
+    <article class="prose legal-prose">
+      {
+        doc.sections.map((s) => (
+          <section id={s.id} class="legal-section">
+            <h2>{s.title}</h2>
+            <Fragment set:html={s.html} />
+          </section>
+        ))
+      }
+    </article>
+  </div>
+</BaseLayout>
+
+<style>
+  .legal {
+    display: grid;
+    gap: 40px;
+    padding-bottom: clamp(96px, 12vw, 160px);
+  }
+
+  /* ---------- Table of contents ---------- */
+  .legal-toc ol {
+    list-style: none;
+    margin: 14px 0 0;
+    padding: 0;
+  }
+  .legal-toc li {
+    break-inside: avoid;
+  }
+  .legal-toc ol a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 4px 0;
+    color: var(--text-2);
+    font-size: 15px;
+    line-height: 1.35;
+    transition: color 0.3s ease;
+  }
+  .legal-toc ol a:hover {
+    color: var(--text);
+  }
+  .toc-bar {
+    flex: none;
+    width: 12px;
+    height: 2px;
+    border-radius: 2px;
+    background: #3a4158;
+    transition:
+      width 0.45s var(--ease-out),
+      background 0.45s ease;
+  }
+  .legal-toc a[aria-current="true"] {
+    color: var(--text);
+  }
+  .legal-toc a[aria-current="true"] .toc-bar {
+    width: 26px;
+    background: var(--accent-3);
+  }
+  .legal-related {
+    margin: 18px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-3);
+  }
+  .legal-related a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-weight: 600;
+  }
+
+  @media (max-width: 1023px) {
+    .legal-toc {
+      padding: 22px 24px 18px;
+      border-radius: var(--radius-lg);
+      background: var(--glass);
+      border: 1px solid var(--line);
+    }
+    .legal-toc ol {
+      columns: 2 240px;
+      column-gap: 32px;
+    }
+    .legal-toc .toc-bar {
+      display: none;
+    }
+  }
+  @media (min-width: 1024px) {
+    .legal {
+      grid-template-columns: 232px minmax(0, 1fr);
+      gap: clamp(56px, 7vw, 96px);
+      align-items: start;
+    }
+    .legal-toc {
+      position: sticky;
+      top: 112px;
+      max-height: calc(100vh - 136px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+    .legal-toc ol a {
+      font-size: 14px;
+      color: var(--text-3);
+    }
+  }
+
+  /* ---------- Document ---------- */
+  .legal-section + .legal-section {
+    margin-top: 56px;
+    padding-top: 48px;
+    border-top: 1px solid var(--line);
+  }
+  .legal-section h2 {
+    margin-top: 0;
+  }
+  .legal-prose :global(h3) {
+    margin-top: 1.5em;
+  }
+  .legal-prose :global(blockquote.callout-warn) {
+    background: rgba(255, 179, 64, 0.08);
+    border-color: rgba(255, 179, 64, 0.3);
+  }
+  .legal-prose :global(blockquote.callout-warn strong) {
+    color: #ffd59a;
+  }
+
+  /* Contact details as mono key/value rows. */
+  .legal-prose :global(.legal-contact) {
+    margin: 0 0 1.2em;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+  .legal-prose :global(.legal-contact > div) {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 4px 16px;
+    padding: 12px 16px;
+  }
+  .legal-prose :global(.legal-contact > div + div) {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .legal-prose :global(.legal-contact dt) {
+    font: 500 12px/1.9 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .legal-prose :global(.legal-contact dd) {
+    margin: 0;
+    color: var(--text);
+    overflow-wrap: anywhere;
+  }
+  @media (max-width: 480px) {
+    .legal-prose :global(.legal-contact > div) {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // Scroll-spy: mark the contents link for the section that has crossed 30% of the viewport.
+  const root = document.querySelector<HTMLElement>("[data-legal]");
+  if (root) {
+    const links = Array.from(root.querySelectorAll<HTMLAnchorElement>("[data-toc]"));
+    const sections = links
+      .map((a) => document.getElementById(a.dataset.toc || ""))
+      .filter((s): s is HTMLElement => s !== null);
+
+    let current = "";
+    let queued = false;
+    const update = () => {
+      queued = false;
+      if (!sections.length) return;
+      const line = window.innerHeight * 0.3;
+      let active = sections[0];
+      for (const s of sections) {
+        if (s.getBoundingClientRect().top <= line) active = s;
+        else break;
+      }
+      // Short sections at the end never reach the line, so the bottom of the page wins.
+      const doc = document.documentElement;
+      if (window.innerHeight + window.scrollY >= doc.scrollHeight - 4) active = sections[sections.length - 1];
+      if (active.id === current) return;
+      current = active.id;
+      for (const a of links) {
+        if (a.dataset.toc === current) a.setAttribute("aria-current", "true");
+        else a.removeAttribute("aria-current");
+      }
+    };
+    const schedule = () => {
+      if (!queued) {
+        queued = true;
+        requestAnimationFrame(update);
+      }
+    };
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    update();
+  }
+</script>

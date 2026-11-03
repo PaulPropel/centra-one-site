@@ -1,0 +1,35 @@
+# Centra One
+
+> The AI-powered wholesale platform: inventory, quoting, orders, purchasing, a B2B customer portal and Centra AI in one product, for wholesalers, distributors and small manufacturers in New Zealand and Australia. Priced in US dollars. Data stored in Sydney, Australia.
+
+Centra One tracks stock across warehouses (with bin, batch, expiry and serial tracking), sends quotes customers accept online, runs sales and purchase orders, pick, pack and ship, and gives customers a branded B2B ordering portal. Centra AI answers questions from live business data on every plan. On the Growth and Scale plans it also drafts actions, such as purchase orders grouped by supplier, for a person to approve. Nothing is sent without approval.
+
+Plans (US dollars, per organisation, billed monthly):
+- Starter: US$59 a month. Up to $1M annual revenue, 3 users.
+- Growth: US$129 a month. $1M to $2.5M annual revenue, 5 users. Adds Centra AI actions, multi-currency and landed costs, custom document templates, a dedicated onboarding session and priority email support.
+- Scale: US$199 a month. $2.5M to $5M annual revenue, 10 users. Adds phone support, a quarterly business review, custom integrations consultation, early access to new features and API access (coming soon).
+- Over $5M annual revenue: custom pricing.
+Extra users are US$15 a month each. Every plan has a 30-day free trial with no credit card.
+
+Integrations live today: Xero (invoices, contacts, bills and tax codes pushed to Xero), Shopify (stock synced every 15 minutes, orders imported automatically), Aramex and Bascik Transport (consignments and tracking). Coming soon: API access, MYOB, WooCommerce and Stripe payments.
+
+Centra One is made by Centra One Limited, a New Zealand company. The app runs on Cloudflare, with data in Supabase in Sydney, Australia.
+
+## Pages
+
+- [Home](https://centra-one.ai/): What Centra One does, the Centra AI demo, pricing and FAQs.
+- [Features](https://centra-one.ai/features): Inventory, sales and quoting, purchasing, fulfilment, the B2B portal and Centra AI.
+- [Centra AI](https://centra-one.ai/ai): How Centra AI answers questions, raises alerts and prepares actions for approval.
+- [Integrations](https://centra-one.ai/integrations): What syncs with Xero, Shopify, Aramex and Bascik, and what's coming.
+- [Pricing](https://centra-one.ai/pricing): Plans, what each one adds, a comparison and FAQs.
+- [About](https://centra-one.ai/about): Who builds Centra One and why.
+- [Contact](https://centra-one.ai/contact): Book a walkthrough or ask a question. We reply within one business day.
+- [Help centre](https://centra-one.ai/help): Guides for getting started and everyday tasks.
+- [Changelog](https://centra-one.ai/changelog): What's new, month by month.
+- [Careers](https://centra-one.ai/careers): Open roles.
+
+## Optional
+
+- [Blog](https://centra-one.ai/blog)
+- [Privacy policy](https://centra-one.ai/privacy)
+- [Terms of service](https://centra-one.ai/terms)

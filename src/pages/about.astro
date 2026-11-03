@@ -1,0 +1,599 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import CtaClosing from "../components/CtaClosing.astro";
+import { AI_ACTIONS_FOOTNOTE, PRICING_FOOTNOTE, plans } from "../data/pricing";
+import { SITE_URL, COMPANY, EMAIL } from "../data/site";
+
+const description =
+  "We ran a $5M+ wholesale business on software that never quite fit. Centra One is what we wished we'd had.";
+
+// "Four systems. One business." What running wholesale looked like before.
+const systems = [
+  { area: "Stock", app: "stock-count-v3.xlsx", item: "BioGuard 5L", value: "48 on hand", flag: "Shelf says 31" },
+  { area: "Quotes", app: "Quoting app", item: "Q-1182", value: "Pacific Hotels", flag: "Stock not checked" },
+  { area: "Purchasing", app: "po-tracker.xlsx", item: "ChemCo NZ", value: "5-day lead", flag: "Updated 3 weeks ago" },
+  { area: "The real answer", app: "Someone's head", item: "What actually sells", value: "", flag: "On leave till Monday", human: true },
+];
+
+// Then, and what we built instead. `now` may hold <sup> footnote markers.
+const pains = [
+  {
+    title: "A tool for every job, and none for the business.",
+    then: "Every gap got filled with another subscription. Each one held part of the picture, and the only place they came together was manually, at the end of the month, when it was already too late to act on.",
+    now: "One system where inventory, purchasing, sales, quoting and dispatch write to the same record. A receipt on the dock is a number in the accounts before anyone opens a spreadsheet.",
+  },
+  {
+    title: "Software that stored data but never told you anything.",
+    then: "The information was in there somewhere. But nothing said “this line runs out on Thursday and the lead time is five days.” You found out by running out.",
+    now: "Centra AI, with the full context of your business. It watches around the clock, surfaces what needs attention before it becomes a problem, and gets the fix ready for your approval.<sup>1</sup>",
+  },
+  {
+    title: "Paying more for things we already needed.",
+    then: "Batch tracking behind a tier. Expiry dates as an add-on. Quoting sold separately. The features you need most are the ones priced out of reach when you're small.",
+    now: "Pricing based on the size of your business. Every plan runs the full platform, including batch and expiry tracking, quoting and the B2B portal. Bigger plans add more users, Centra AI actions<sup>1</sup> and more hands-on help.",
+  },
+];
+
+const beliefs = [
+  {
+    statement: "Software shouldn't hold the basics hostage to force an upgrade.",
+    proof:
+      "Every plan runs the full platform: batch, serial and expiry tracking, quoting, the B2B portal, Shopify and the Centra AI assistant. Growth and Scale add Centra AI actions, multi-currency and landed costs, and more hands-on support.",
+  },
+  {
+    statement: "AI should never do anything you can't undo.",
+    proof:
+      "Centra AI drafts, then asks. Nothing is sent or saved until you approve it.<sup>1</sup> It can't post a stocktake, dispatch an order, approve a purchase order or delete anything. Irreversible actions stay human-only, by design.",
+  },
+  {
+    statement: "If someone else does it better, say so.",
+    proof:
+      "Demand forecasting isn't in the product yet. It's on the roadmap, and that's exactly what we tell you. A comparison you can't lose is a comparison nobody believes.",
+  },
+  {
+    statement: "You shouldn't have to go looking for the thing that's about to go wrong.",
+    proof:
+      "More than 20 alerts run from the moment you connect your data: expiring batches, overdue invoices, stock below its reorder point. No setup, no dashboards to build.",
+  },
+];
+
+const startingPrice = Math.min(...plans.map((p) => p.price));
+const stats = [
+  { value: "$5M+", label: "The size of the wholesale business we ran before building this" },
+  { value: "2026", label: "Founded. Built for how wholesale works now, not retrofitted" },
+  { value: `$${startingPrice}`, label: "US a month to start, with the full platform on every plan", accent: true },
+];
+const reveal = ["rv", "rv2", "rv3", "rv3"];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  name: "About Centra One",
+  url: `${SITE_URL}/about`,
+  description,
+  mainEntity: {
+    "@type": "Organization",
+    name: COMPANY.name,
+    legalName: COMPANY.legalName,
+    url: SITE_URL,
+    logo: `${SITE_URL}/icon-512.png`,
+    email: EMAIL.hello,
+    foundingDate: "2026",
+    description: "The AI-powered wholesale platform, built in New Zealand for wholesalers, distributors and small manufacturers.",
+    address: { "@type": "PostalAddress", addressCountry: "NZ" },
+    areaServed: ["NZ", "AU"],
+  },
+};
+---
+
+<BaseLayout title="About" description={description} jsonLd={jsonLd} footnotes={[AI_ACTIONS_FOOTNOTE]} notes={[PRICING_FOOTNOTE]}>
+  <PageHeader
+    eyebrow="About"
+    title={`We ran a wholesale business.<br><span class="dim">That's why this exists.</span>`}
+    lead="Centra One was built by people who spent years running a $5M+ wholesale operation on software that never quite fit, and got tired of it."
+  />
+
+  <section class="section problem">
+    <div class="container">
+      <p class="eyebrow rv">The problem we lived with</p>
+      <h2 class="h2 rv mt-24">Four systems.<br /><span class="dim">One business.</span></h2>
+      <p class="lead rv2 mt-24">
+        Stock in one tool, quoting in another, purchasing on a spreadsheet, and the real answer living in someone's
+        head. Nothing talked to anything else, and none of it told us what we needed to know, right when it mattered.
+      </p>
+
+      <div class="rv2 mt-64">
+        <div
+          class="systems"
+          role="img"
+          aria-label="Illustration: stock in a spreadsheet, quotes in a separate app, purchasing in another spreadsheet, and the real answer in someone's head. None of them are connected."
+        >
+          <div class="systems-grid">
+            {
+              systems.map((s) => (
+                <div class:list={["sys", { "sys-human": s.human }]}>
+                  <p class="sys-area mono">{s.area}</p>
+                  <p class="sys-app">{s.app}</p>
+                  <p class="sys-row mono">
+                    <span>{s.item}</span>
+                    {s.value && <span>{s.value}</span>}
+                  </p>
+                  <p class="sys-flag mono">
+                    <span class="sys-dot" />
+                    {s.flag}
+                  </p>
+                </div>
+              ))
+            }
+            <span class="sys-x sys-x1" />
+            <span class="sys-x sys-x2" />
+            <span class="sys-x sys-x3" />
+            <span class="sys-x sys-x4" />
+          </div>
+          <p class="systems-foot mono"><span>4 systems</span><span class="systems-zero">0 connections</span></p>
+        </div>
+      </div>
+
+      <div class="pairs">
+        {
+          pains.map((p) => (
+            <article class="pair rv">
+              <h3 class="pair-title">{p.title}</h3>
+              <div class="pair-grid">
+                <div class="pair-then">
+                  <p class="pair-label mono">Then</p>
+                  <p class="pair-text">{p.then}</p>
+                </div>
+                <span class="pair-arrow" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+                </span>
+                <div class="pair-now">
+                  <p class="pair-label mono">So we built</p>
+                  <p class="pair-text" set:html={p.now} />
+                </div>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section beliefs-section">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="container relative">
+      <p class="eyebrow rv">What we believe</p>
+      <h2 class="h2 rv mt-24">Opinions.<br /><span class="dim">And the proof we mean them.</span></h2>
+      <p class="lead rv2 mt-24">Anyone can list values. These are positions we've taken, each one visible in the product.</p>
+
+      <div class="beliefs mt-64">
+        {
+          beliefs.map((b, i) => (
+            <article class:list={["tile", "belief", reveal[i]]}>
+              <h3 class="tile-title">{b.statement}</h3>
+              <div class="belief-proof">
+                <p class="belief-label mono">Where you can see it</p>
+                <p class="belief-text" set:html={b.proof} />
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight stats-section" aria-label="Centra One in numbers">
+    <div class="container">
+      <div class="stats">
+        {
+          stats.map((s, i) => (
+            <div class:list={["stat", reveal[i], { "stat-accent": s.accent }]}>
+              <p class="stat-value">{s.value}</p>
+              <p class="fine stat-label">{s.label}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section straight">
+    <div class="container container-narrow">
+      <p class="eyebrow rv">Straight up</p>
+      <h2 class="h2 rv mt-24">New software.<br /><span class="dim">Not new to wholesale.</span></h2>
+      <div class="letter rv2 mt-48">
+        <p>
+          Centra One launched in 2026. We're not going to pretend to a decade of history we don't have. You can check,
+          and you should.
+        </p>
+        <p>
+          What we do have is years on the other side of this problem: <strong
+            >chasing stock that wasn't where the system said it was, quoting from a spreadsheet, finding out about a
+            dead line three months too late.</strong
+          > Every design decision in this product came from something that cost us money.
+        </p>
+        <p>
+          That's the trade we're offering. Not the longest track record, but software built by people who have actually
+          done your job, and who are close enough to the work to still care when something's wrong.
+        </p>
+      </div>
+      <p class="fine letter-sign rv3">{COMPANY.legalName} · Built in New Zealand</p>
+    </div>
+  </section>
+
+  <CtaClosing
+    title='Built for people who<br><span class="shine">run this every day.</span>'
+    lead="Bring your product list and see it running on your own numbers. Setup takes less than a day."
+    secondary={{ label: "Talk to us", href: "/contact" }}
+    fine={`No credit card · Cancel any time · From US$${startingPrice}/mo`}
+  />
+</BaseLayout>
+
+<style>
+  /* ---------- The problem ---------- */
+  .problem {
+    padding-top: clamp(40px, 5vw, 72px);
+  }
+
+  /* Four systems in a row (2 x 2 on tablets, stacked on phones), with a broken link in
+     every gap between them. */
+  .systems {
+    padding: clamp(18px, 2.4vw, 26px);
+    border-radius: var(--radius-xl);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--line);
+  }
+  .systems-grid {
+    --gap: 36px;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gap);
+  }
+  .sys {
+    min-width: 0;
+    padding: 16px 16px 14px;
+    border-radius: 18px;
+    background: var(--glass-solid);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .sys p {
+    margin: 0;
+  }
+  .sys-area {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-4);
+  }
+  .sys-app {
+    margin-top: 6px !important;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .sys-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2px 10px;
+    margin-top: 12px !important;
+    padding: 9px 11px;
+    border-radius: 10px;
+    background: var(--fill);
+    color: var(--soft);
+    font-size: 12px;
+  }
+  .sys-row span {
+    white-space: nowrap;
+  }
+  .sys-flag {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 10px !important;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--red-2);
+  }
+  .sys-dot {
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .sys-human {
+    background: rgba(255, 179, 64, 0.06);
+    border-style: dashed;
+    border-color: rgba(255, 179, 64, 0.35);
+  }
+  .sys-human .sys-app {
+    color: #ffd59a;
+  }
+  .sys-human .sys-flag {
+    color: var(--amber);
+  }
+
+  /* Broken links between the four: a dashed stub with a red cross in every gap. */
+  .sys-x {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1px solid rgba(255, 90, 79, 0.5);
+    transform: translate(-50%, -50%);
+  }
+  .sys-x::before,
+  .sys-x::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 9px;
+    height: 1.5px;
+    border-radius: 2px;
+    background: var(--red);
+  }
+  .sys-x::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+  .sys-x::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
+  }
+  /* 2 x 2: centred in each gap, half a cell in from the edge. */
+  .sys-x1 {
+    left: 50%;
+    top: calc((100% - var(--gap)) / 4);
+  }
+  .sys-x2 {
+    left: 50%;
+    top: calc(100% - (100% - var(--gap)) / 4);
+  }
+  .sys-x3 {
+    left: calc((100% - var(--gap)) / 4);
+    top: 50%;
+  }
+  .sys-x4 {
+    left: calc(100% - (100% - var(--gap)) / 4);
+    top: 50%;
+  }
+  @media (min-width: 1080px) {
+    .systems-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    /* One row: a cross in each of the three gaps. */
+    .sys-x1,
+    .sys-x2,
+    .sys-x3 {
+      top: 50%;
+    }
+    .sys-x1 {
+      left: calc((100% - 3 * var(--gap)) / 4 + var(--gap) / 2);
+    }
+    .sys-x2 {
+      left: 50%;
+    }
+    .sys-x3 {
+      left: calc(100% - (100% - 3 * var(--gap)) / 4 - var(--gap) / 2);
+    }
+    .sys-x4 {
+      display: none;
+    }
+  }
+  .systems-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 18px 2px 0;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-4);
+  }
+  .systems-zero {
+    color: var(--red-2);
+  }
+  @media (max-width: 560px) {
+    /* Stacked: equal rows, a cross in each of the three gaps. */
+    .systems-grid {
+      --gap: 28px;
+      grid-template-columns: minmax(0, 1fr);
+      grid-auto-rows: 1fr;
+    }
+    .sys-x1,
+    .sys-x2,
+    .sys-x3 {
+      left: 50%;
+    }
+    .sys-x1 {
+      top: calc((100% - 3 * var(--gap)) / 4 + var(--gap) / 2);
+    }
+    .sys-x2 {
+      top: 50%;
+    }
+    .sys-x3 {
+      top: calc(100% - (100% - 3 * var(--gap)) / 4 - var(--gap) / 2);
+    }
+    .sys-x4 {
+      display: none;
+    }
+  }
+
+  /* Then / So we built */
+  .pairs {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: clamp(64px, 8vw, 104px);
+  }
+  .pair {
+    padding: clamp(24px, 3.4vw, 36px);
+    border-radius: var(--radius-xl);
+    background: var(--glass);
+    border: 1px solid var(--line);
+  }
+  .pair-title {
+    margin: 0;
+    max-width: 760px;
+    font-size: clamp(24px, 2.6vw, 32px);
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+    font-weight: 700;
+  }
+  .pair-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: stretch;
+    gap: 14px;
+    margin-top: 24px;
+  }
+  .pair-then,
+  .pair-now {
+    padding: 20px 22px;
+    border-radius: 18px;
+  }
+  .pair-then {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .pair-now {
+    background: rgba(91, 108, 255, 0.1);
+    border: 1px solid rgba(91, 108, 255, 0.32);
+  }
+  .pair-label {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-4);
+  }
+  .pair-now .pair-label {
+    color: var(--accent-3);
+  }
+  .pair-text {
+    margin: 10px 0 0;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .pair-then .pair-text {
+    color: var(--text-2);
+  }
+  .pair-now .pair-text {
+    color: #dfe3f5;
+  }
+  .pair-arrow {
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(91, 108, 255, 0.16);
+    color: var(--accent-4);
+  }
+  @media (max-width: 760px) {
+    .pair-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 10px;
+    }
+    .pair-arrow {
+      justify-self: center;
+      transform: rotate(90deg);
+    }
+  }
+
+  /* ---------- Beliefs ---------- */
+  .beliefs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+    gap: 16px;
+  }
+  .belief {
+    gap: 28px;
+  }
+  .belief .tile-title {
+    max-width: 440px;
+  }
+  .belief-proof {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+  .belief-label {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-3);
+  }
+  .belief-text {
+    margin: 10px 0 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-2);
+  }
+
+  /* ---------- Numbers ---------- */
+  .stats-section {
+    padding-top: 0;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: 16px;
+    padding-top: clamp(48px, 6vw, 72px);
+    border-top: 1px solid var(--line);
+  }
+  .stat {
+    padding: 28px;
+    border-radius: 24px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .stat-accent {
+    border-color: rgba(91, 108, 255, 0.35);
+    background: rgba(91, 108, 255, 0.08);
+  }
+  .stat-value {
+    margin: 0;
+    font-size: clamp(52px, 5.4vw, 72px);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-weight: 700;
+  }
+  .stat-label {
+    margin-top: 14px;
+    line-height: 1.5;
+  }
+  .stat-accent .stat-label {
+    color: var(--accent-4);
+  }
+
+  /* ---------- Straight up ---------- */
+  .letter p {
+    margin: 0 0 1.1em;
+    font-size: clamp(19px, 1.9vw, 22px);
+    line-height: 1.6;
+    color: var(--text-2);
+  }
+  .letter p:last-child {
+    margin-bottom: 0;
+  }
+  .letter strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .letter-sign {
+    margin-top: 40px;
+    color: var(--text-4);
+  }
+</style>

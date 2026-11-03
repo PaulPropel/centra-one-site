@@ -1,0 +1,178 @@
+---
+// "Six modules, one record": a day in the life of one product, as each module writes to
+// the same record. Illustrative data (see the page notes).
+import { recordEvents } from "../../data/features";
+---
+
+<figure class="rec glass-solid">
+  <figcaption class="sr-only">Example: one product's record, written to by every part of Centra One.</figcaption>
+  <div class="rec-head">
+    <div class="rec-id">
+      <p class="rec-kicker mono">PRODUCT RECORD</p>
+      <p class="rec-name">BioGuard Disinfectant 5L</p>
+      <p class="rec-sku mono">BG-5L · CHEMCO NZ · 3 WAREHOUSES</p>
+    </div>
+    <span class="rec-cover mono"><span class="live" aria-hidden="true"></span>7 DAYS OF STOCK</span>
+  </div>
+  <ol class="rec-list">
+    {
+      recordEvents.map((e) => (
+        <li class:list={["rec-ev", e.tone && `rec-${e.tone}`]}>
+          <span class="rec-dot" aria-hidden="true" />
+          <div class="rec-body">
+            <p class="rec-top mono">
+              <span class="rec-mod">{e.module}</span>
+              <span class="rec-when">{e.when}</span>
+            </p>
+            <p class="rec-what" set:html={e.what} />
+            <p class="rec-meta mono">
+              {e.meta}
+              {e.tone === "ai" && <sup>1</sup>}
+            </p>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</figure>
+
+<style>
+  .rec {
+    margin: 0;
+    border-radius: 26px;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 50px 120px -60px rgba(26, 26, 255, 0.6);
+    overflow: hidden;
+  }
+  .rec-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 22px 24px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .rec-kicker {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--text-4);
+  }
+  .rec-name {
+    margin: 6px 0 0;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+  .rec-sku {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: var(--text-3);
+  }
+  .rec-cover {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 980px;
+    background: rgba(255, 179, 64, 0.12);
+    color: var(--amber);
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .rec-list {
+    position: relative;
+    margin: 0;
+    padding: 12px 24px 18px;
+    list-style: none;
+  }
+  /* The spine the events hang off */
+  .rec-list::before {
+    content: "";
+    position: absolute;
+    left: 31px;
+    top: 26px;
+    bottom: 38px;
+    width: 2px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, rgba(139, 155, 255, 0.5), rgba(139, 155, 255, 0.12) 70%, rgba(139, 155, 255, 0.55));
+  }
+  .rec-ev {
+    position: relative;
+    display: flex;
+    gap: 18px;
+    padding: 10px 0;
+  }
+  .rec-dot {
+    position: relative;
+    flex: none;
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+    border-radius: 50%;
+    background: var(--bg-2);
+    border: 2px solid var(--accent-3);
+  }
+  .rec-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .rec-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .rec-mod {
+    color: var(--accent-3);
+  }
+  .rec-when {
+    color: var(--text-4);
+    white-space: nowrap;
+  }
+  .rec-what {
+    margin: 4px 0 0;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+  .rec-meta {
+    margin: 3px 0 0;
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    color: var(--text-3);
+  }
+  .rec-shopify .rec-dot {
+    border-color: var(--shopify);
+  }
+  .rec-shopify .rec-mod {
+    color: #b9db7c;
+  }
+  .rec-ai .rec-dot {
+    border-color: var(--amber);
+    background: var(--amber);
+    box-shadow: 0 0 0 5px rgba(255, 179, 64, 0.16);
+  }
+  .rec-ai .rec-mod {
+    color: var(--amber);
+  }
+  .rec-ai .rec-what {
+    color: #ffe2b0;
+  }
+  @media (max-width: 520px) {
+    .rec-head,
+    .rec-list {
+      padding-inline: 18px;
+    }
+    .rec-list::before {
+      left: 25px;
+    }
+  }
+</style>

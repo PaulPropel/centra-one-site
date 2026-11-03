@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://centra-one.ai/sitemap-index.xml

@@ -1,0 +1,127 @@
+---
+// /ai Growth Intel: every alert Centra AI watches for, grouped as a bento.
+import Icon, { type IconName } from "../Icon.astro";
+import { alertGroups } from "../../data/ai";
+
+const reveal = ["rv", "rv2", "rv3", "rv2", "rv3"];
+---
+
+<div class="gi">
+  {
+    alertGroups.map((g, i) => (
+      <article class:list={["gi-card", `gi-${g.id}`, reveal[i]]} aria-labelledby={`gi-${g.id}-name`}>
+        <div class="gi-head">
+          <span class="gi-icon" aria-hidden="true">
+            <Icon name={g.icon as IconName} size={17} />
+          </span>
+          <h3 class="gi-name" id={`gi-${g.id}-name`}>
+            {g.name}
+          </h3>
+          <span class="gi-count mono" aria-hidden="true">
+            {g.alerts.length}
+          </span>
+        </div>
+        <ul class="gi-list">
+          {g.alerts.map((a) => (
+            <li>{a}</li>
+          ))}
+        </ul>
+      </article>
+    ))
+  }
+</div>
+
+<style>
+  .gi {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .gi-card {
+    padding: 26px;
+    border-radius: var(--radius-xl);
+    background: var(--glass);
+    border: 1px solid var(--line);
+  }
+  .gi-inventory {
+    grid-row: span 2;
+    background: linear-gradient(180deg, rgba(91, 108, 255, 0.12), rgba(91, 108, 255, 0.03));
+    border-color: rgba(91, 108, 255, 0.3);
+  }
+  .gi-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .gi-icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    background: rgba(91, 108, 255, 0.14);
+    color: var(--accent-4);
+  }
+  .gi-name {
+    flex: 1;
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .gi-count {
+    padding: 4px 10px;
+    border-radius: 980px;
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--soft);
+    font-size: 12px;
+  }
+  .gi-inventory .gi-count {
+    background: var(--accent);
+    color: #fff;
+  }
+  .gi-list {
+    margin: 18px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .gi-list li {
+    position: relative;
+    padding: 9px 0 9px 20px;
+    font-size: 15px;
+    line-height: 1.4;
+    color: var(--text-2);
+  }
+  .gi-list li + li {
+    border-top: 1px solid rgba(255, 255, 255, 0.055);
+  }
+  .gi-list li::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 1.05em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-3);
+  }
+
+  @media (max-width: 1000px) {
+    .gi {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 640px) {
+    .gi {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .gi-inventory {
+      grid-row: auto;
+    }
+    .gi-card {
+      padding: 22px;
+    }
+  }
+</style>

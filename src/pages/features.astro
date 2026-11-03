@@ -1,0 +1,392 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import CtaClosing from "../components/CtaClosing.astro";
+import Icon, { type IconName } from "../components/Icon.astro";
+import ModuleExplorer from "../components/features/ModuleExplorer.astro";
+import RecordTimeline from "../components/features/RecordTimeline.astro";
+import { shortVersion, differentiators } from "../data/features";
+import { plans, AI_ACTIONS_FOOTNOTE } from "../data/pricing";
+import { SIGNUP_URL } from "../data/site";
+
+const reveal = ["rv", "rv2", "rv3"];
+---
+
+<BaseLayout
+  title="Features"
+  description="Inventory, quoting, purchasing, fulfilment, a B2B portal and Centra AI, built for wholesale. See every feature, and what each plan adds."
+  footnotes={[AI_ACTIONS_FOOTNOTE]}
+  notes={["Product screens and figures are illustrative."]}
+>
+  <PageHeader
+    eyebrow="Features"
+    title={`Everything a wholesale business needs.<br><span class="dim">Nothing it doesn't.</span>`}
+    lead="Built for wholesale, not adapted from a generic inventory tool. Every plan runs the full platform, from stock and quotes to the portal and Centra AI."
+  >
+    <div class="btn-row">
+      <a class="btn btn-primary" href={SIGNUP_URL}>Start free trial</a>
+      <a class="btn btn-secondary" href="/contact?kind=demo#form">Book a demo</a>
+    </div>
+  </PageHeader>
+
+  <section class="section-tight explore" aria-labelledby="explore-label">
+    <div class="container">
+      <p class="eyebrow rv" id="explore-label">Explore the platform</p>
+      <div class="mt-24 rv">
+        <ModuleExplorer />
+      </div>
+      <p class="fine explore-fine mt-32 rv">
+        Every module is on every plan. Features tagged
+        <span class="explore-tag">Growth and Scale</span> come with those plans.
+      </p>
+    </div>
+  </section>
+
+  <section class="section short">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="container relative">
+      <p class="eyebrow rv">The short version</p>
+      <h2 class="h2 rv mt-24">Six modules.<br /><span class="dim">One record.</span></h2>
+      <p class="lead rv2 mt-24">
+        Stock, sales, purchasing, dispatch, the portal and Centra AI all write to the same record. A delivery checked in
+        at the dock is stock on the next quote, with no spreadsheet in between.
+      </p>
+
+      <div class="short-split mt-64">
+        <ul class="short-list">
+          {
+            shortVersion.map((item, i) => (
+              <li class:list={["short-item", reveal[i % 3]]}>
+                <span class="short-icon" aria-hidden="true">
+                  <Icon name={item.icon as IconName} size={20} />
+                </span>
+                <div>
+                  <h3 class="short-title">
+                    <a href={item.href}>{item.title}</a>
+                  </h3>
+                  <p class="short-body" set:html={item.body} />
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+        <div class="short-record rv2">
+          <RecordTimeline />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section diff-section">
+    <div class="container">
+      <p class="eyebrow rv">Why it's different</p>
+      <h2 class="h2 rv mt-24">Built for wholesale.<br /><span class="dim">Not adapted for it.</span></h2>
+      <p class="lead rv2 mt-24">These are the capabilities generic inventory tools treat as add-ons, or don't have at all.</p>
+
+      <div class="diff mt-64">
+        {
+          differentiators.map((d) => (
+            <article class="diff-row rv">
+              <p class="diff-kicker mono">{d.kicker}</p>
+              <div class="diff-text">
+                <h3 class="diff-title">
+                  {d.title}
+                  {d.growth && (
+                    <span class="diff-plan mono">
+                      <span class="sr-only">Available on </span>Growth and Scale
+                    </span>
+                  )}
+                </h3>
+                <p class="body diff-body">{d.body}</p>
+              </div>
+              <div class="diff-data" aria-hidden="true">
+                {d.rows.map((r) => (
+                  <p class:list={["data", { "data-good": r.tone === "good", "data-accent": r.tone === "accent" }]}>
+                    <span>{r.k}</span>
+                    <span>{r.v}</span>
+                  </p>
+                ))}
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="container">
+      <div class="plans-strip glass rv">
+        <div class="ps-head">
+          <p class="eyebrow">Plans</p>
+          <h2 class="ps-title mt-16">One platform.<br /><span class="dim">Three sizes.</span></h2>
+          <p class="body mt-16">
+            Every plan runs the full platform. Growth and Scale add Centra AI actions, more users and more hands-on help.
+          </p>
+          <a class="btn btn-secondary mt-24" href="/pricing">See pricing</a>
+        </div>
+        <div class="ps-cols">
+          {
+            plans.map((p, i) => (
+              <div class="ps-col">
+                <p class="ps-name">
+                  {p.name}
+                  <span class="ps-price mono">${p.price} US / month</span>
+                </p>
+                <p class="ps-intro mono">{i === 0 ? "Every plan includes" : `${p.name} adds`}</p>
+                <ul class="ps-list">
+                  {p.features.map((f) => (
+                    <li set:html={f} />
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CtaClosing
+    title='See it running on <span class="shine">your numbers.</span>'
+    lead="Import your products, customers and suppliers in under an hour. Setup takes less than a day."
+    secondary={{ label: "Talk to us first", href: "/contact" }}
+    fine="No credit card required · Cancel any time · From US$59 a month"
+  />
+</BaseLayout>
+
+<style>
+  .explore {
+    padding-top: 8px;
+  }
+  .explore-fine {
+    line-height: 2;
+  }
+  .explore-tag {
+    padding: 3px 7px;
+    border-radius: 7px;
+    background: rgba(167, 139, 250, 0.15);
+    color: var(--violet-2);
+    white-space: nowrap;
+  }
+
+  /* ---------- The short version ---------- */
+  .short-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: clamp(32px, 6vw, 72px);
+    align-items: center;
+  }
+  .short-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 6px;
+  }
+  .short-item {
+    display: flex;
+    gap: 16px;
+    padding: 16px 0;
+  }
+  .short-item + .short-item {
+    border-top: 1px solid var(--line);
+  }
+  .short-icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(91, 108, 255, 0.12);
+    border: 1px solid rgba(91, 108, 255, 0.28);
+    color: var(--accent-4);
+  }
+  .short-title {
+    margin: 0;
+    font-size: 19px;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+  .short-title a {
+    color: var(--text);
+  }
+  .short-title a:hover {
+    color: var(--accent-4);
+  }
+  .short-body {
+    margin: 6px 0 0;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+
+  /* ---------- Why it's different ---------- */
+  .diff {
+    border-bottom: 1px solid var(--line);
+  }
+  .diff-row {
+    display: grid;
+    grid-template-columns: 170px minmax(0, 1fr) minmax(0, 360px);
+    gap: 20px clamp(24px, 4vw, 48px);
+    align-items: start;
+    padding: 40px 0;
+    border-top: 1px solid var(--line);
+  }
+  .diff-kicker {
+    margin: 4px 0 0;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-3);
+  }
+  .diff-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+    margin: 0;
+    font-size: clamp(24px, 2.4vw, 30px);
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+    font-weight: 700;
+  }
+  .diff-plan {
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: rgba(167, 139, 250, 0.15);
+    color: var(--violet-2);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .diff-body {
+    margin-top: 12px;
+    max-width: 560px;
+  }
+  .diff-data {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 4px;
+  }
+  .diff-data .data span:last-child {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* ---------- Plans strip ---------- */
+  .plans-strip {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 2fr);
+    gap: clamp(28px, 4vw, 48px);
+    padding: clamp(28px, 4vw, 44px);
+  }
+  .ps-title {
+    margin-bottom: 0;
+    font-size: clamp(30px, 3.2vw, 40px);
+    line-height: 1.02;
+    letter-spacing: -0.045em;
+    font-weight: 700;
+  }
+  .ps-cols {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .ps-col {
+    padding: 4px 0 4px 24px;
+    border-left: 1px solid var(--line);
+  }
+  .ps-name {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .ps-price {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-3);
+    letter-spacing: 0;
+  }
+  .ps-intro {
+    margin: 20px 0 0;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-4);
+  }
+  .ps-list {
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    font-size: 15px;
+    line-height: 1.4;
+    color: var(--soft);
+  }
+  .ps-list li {
+    position: relative;
+    padding-left: 20px;
+  }
+  .ps-list li::before {
+    content: "";
+    position: absolute;
+    left: 1px;
+    top: 0.42em;
+    width: 9px;
+    height: 5px;
+    border-left: 2px solid var(--accent-3);
+    border-bottom: 2px solid var(--accent-3);
+    transform: rotate(-45deg);
+  }
+
+  @media (max-width: 1000px) {
+    .diff-row {
+      grid-template-columns: 140px minmax(0, 1fr);
+    }
+    .diff-data {
+      grid-column: 2;
+      max-width: 420px;
+    }
+    .plans-strip {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .ps-col:first-child {
+      padding-left: 0;
+      border-left: 0;
+    }
+  }
+  @media (max-width: 900px) {
+    .short-split {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 680px) {
+    .diff-row {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 32px 0;
+    }
+    .diff-data {
+      grid-column: auto;
+    }
+    .ps-cols {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 24px;
+    }
+    .ps-col {
+      padding: 24px 0 0;
+      border-left: 0;
+      border-top: 1px solid var(--line);
+    }
+  }
+</style>

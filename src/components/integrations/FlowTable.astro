@@ -1,0 +1,102 @@
+---
+// "What syncs / Direction" for one integration, styled like the homepage's mono data rows.
+// An ARIA table built from divs; the arrow is decorative and the direction is spelled out
+// for screen readers.
+import Icon from "../Icon.astro";
+import type { Flow } from "../../data/integrations";
+
+interface Props {
+  name: string;
+  flows: Flow[];
+}
+const { name, flows } = Astro.props;
+---
+
+<div class="flow mono" role="table" aria-label={`What syncs between Centra One and ${name}`}>
+  <div class="flow-row flow-head" role="row">
+    <span role="columnheader">What syncs</span>
+    <span role="columnheader">Direction</span>
+  </div>
+  {
+    flows.map((f) => (
+      <div class="flow-row" role="row">
+        <span class="flow-what" role="cell">
+          {f.what}
+        </span>
+        <span class:list={["flow-dir", `is-${f.dir}`]} role="cell">
+          <span class="flow-arrow" aria-hidden="true">
+            <Icon name={f.dir === "out" ? "arrow-right" : "arrow-left"} size={13} stroke={2.6} />
+          </span>
+          <span class="sr-only">{f.dir === "out" ? `From Centra One to ${name}, ` : `From ${name} to Centra One, `}</span>
+          <span class="flow-note">{f.note}</span>
+        </span>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .flow {
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    overflow: hidden;
+    font-size: 13px;
+    background: rgba(5, 6, 10, 0.35);
+  }
+  .flow-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 46px;
+    padding: 10px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .flow-head {
+    min-height: 0;
+    padding-block: 10px;
+    border-top: 0;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-4);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .flow-head > span:last-child {
+    text-align: right;
+  }
+  .flow-what {
+    color: var(--text);
+  }
+  .flow-dir {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    text-align: right;
+  }
+  .flow-arrow {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+  }
+  .is-out .flow-arrow {
+    background: rgba(91, 108, 255, 0.2);
+    color: var(--accent-4);
+  }
+  .is-in .flow-arrow {
+    background: rgba(52, 211, 153, 0.14);
+    color: var(--green);
+  }
+  .flow-note {
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--soft);
+    white-space: nowrap;
+  }
+</style>

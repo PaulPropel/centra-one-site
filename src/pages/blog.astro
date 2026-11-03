@@ -1,0 +1,320 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import CtaClosing from "../components/CtaClosing.astro";
+import Icon from "../components/Icon.astro";
+import ParLevelChart from "../components/blog/ParLevelChart.astro";
+import { getBlogPosts } from "../components/blog/posts";
+import { monthYear } from "../components/article/longform";
+import { COMPANY, SITE_URL } from "../data/site";
+
+const posts = await getBlogPosts();
+const [featured, ...rest] = posts;
+
+// Card art for posts that have it (a component and a mono caption); others get a plain panel.
+const art: Record<string, { Component: typeof ParLevelChart; tag: string }> = {
+  "inventory-par-levels": { Component: ParLevelChart, tag: "PAR LEVEL · 168 UNITS" },
+};
+const featuredArt = featured ? art[featured.id] : undefined;
+const FeaturedArt = featuredArt?.Component;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  name: `${COMPANY.name} blog`,
+  url: `${SITE_URL}/blog`,
+  publisher: { "@type": "Organization", name: COMPANY.name, url: SITE_URL },
+  blogPost: posts.map((p) => ({
+    "@type": "BlogPosting",
+    headline: p.title,
+    url: `${SITE_URL}${p.url}`,
+    datePublished: p.published,
+    ...(p.updated && { dateModified: p.updated }),
+  })),
+};
+---
+
+<BaseLayout
+  title="Blog"
+  description="Practical guides to stock, purchasing and running a wholesale business, from the team building Centra One."
+  jsonLd={jsonLd}
+>
+  <PageHeader
+    eyebrow="Blog"
+    title='Notes from the<br><span class="dim">warehouse floor.</span>'
+    lead="Practical guides to stock, purchasing and running a wholesale business. Formulas you can use today, and straight answers about what software can and can't do yet."
+  />
+
+  <section class="posts" aria-label="Posts">
+    <div class="container">
+      {
+        featured && (
+          <article class="feature rv">
+            <div class:list={["feature-art", { "feature-art-plain": !FeaturedArt }]} aria-hidden="true">
+              <div class="feature-art-glow" />
+              {FeaturedArt && <FeaturedArt compact />}
+              {featuredArt && <span class="feature-art-tag mono">{featuredArt.tag}</span>}
+            </div>
+            <div class="feature-copy">
+              <p class="eyebrow">{featured.category}</p>
+              <h2 class="feature-title">
+                <a href={featured.url}>{featured.title}</a>
+              </h2>
+              <p class="body feature-sub">{featured.subtitle}</p>
+              <p class="fine feature-meta">
+                <span>{monthYear(featured.published)}</span>
+                <span>{featured.minutes} min read</span>
+              </p>
+              <span class="feature-cta" aria-hidden="true">
+                Read the guide
+                <Icon name="arrow-right" size={18} />
+              </span>
+            </div>
+          </article>
+        )
+      }
+
+      {
+        rest.length > 0 && (
+          <div class="grid-auto more">
+            {rest.map((p) => (
+              <article class="post-card rv">
+                <p class="eyebrow">{p.category}</p>
+                <h2 class="post-card-title">
+                  <a href={p.url}>{p.title}</a>
+                </h2>
+                <p class="post-card-sub">{p.description}</p>
+                <p class="fine post-card-meta">
+                  <span>{monthYear(p.published)}</span>
+                  <span>{p.minutes} min read</span>
+                </p>
+              </article>
+            ))}
+          </div>
+        )
+      }
+
+      <aside class="help-link rv2" aria-label="Help centre">
+        <span class="help-link-icon"><Icon name="help" size={22} /></span>
+        <p>
+          <strong>Looking for how-to guides for Centra One?</strong>
+          <span>Setup, purchasing, Xero, Centra AI and permissions are in the help centre.</span>
+        </p>
+        <a class="btn btn-secondary" href="/help">Go to the help centre</a>
+      </aside>
+    </div>
+  </section>
+
+  <CtaClosing />
+</BaseLayout>
+
+<style>
+  .posts {
+    padding-bottom: clamp(48px, 6vw, 80px);
+  }
+
+  /* ---------- Featured post ---------- */
+  .feature {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    background: var(--glass);
+    border: 1px solid var(--line);
+    transition: border-color 0.35s ease, box-shadow 0.35s ease;
+  }
+  .feature:hover,
+  .feature:focus-within {
+    border-color: rgba(122, 140, 255, 0.6);
+    box-shadow: 0 40px 100px -50px rgba(26, 26, 255, 0.9);
+  }
+  .feature-art {
+    position: relative;
+    min-height: 340px;
+    padding: 28px 24px 52px;
+    background: rgba(5, 6, 10, 0.45);
+    border-right: 1px solid var(--line);
+  }
+  .feature-art::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: linear-gradient(rgba(140, 160, 255, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(140, 160, 255, 0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, #000 30%, transparent 100%);
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, #000 30%, transparent 100%);
+  }
+  .feature-art-glow {
+    position: absolute;
+    left: 10%;
+    top: 0;
+    width: 80%;
+    height: 80%;
+    pointer-events: none;
+    background: radial-gradient(closest-side, rgba(26, 26, 255, 0.3), rgba(26, 26, 255, 0));
+    filter: blur(10px);
+  }
+  .feature-art :global(.plc) {
+    position: relative;
+    height: 100%;
+  }
+  .feature-art-tag {
+    position: absolute;
+    left: 24px;
+    bottom: 20px;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--text-4);
+  }
+  .feature-copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(28px, 4vw, 48px);
+  }
+  .feature-title {
+    margin: 16px 0 0;
+    font-size: clamp(30px, 3.4vw, 46px);
+    line-height: 1.02;
+    letter-spacing: -0.045em;
+    font-weight: 700;
+  }
+  .feature-title a {
+    color: var(--text);
+  }
+  /* The whole card is the link. */
+  .feature-title a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+  .feature-title a:focus-visible {
+    outline: none;
+  }
+  .feature:has(.feature-title a:focus-visible) {
+    outline: 2px solid var(--accent-3);
+    outline-offset: 3px;
+  }
+  .feature-sub {
+    margin-top: 16px;
+    max-width: 480px;
+  }
+  .feature-meta,
+  .post-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 22px;
+    color: var(--text-3);
+  }
+  .feature-meta span,
+  .post-card-meta span {
+    white-space: nowrap;
+  }
+  .feature-meta span:not(:last-child)::after,
+  .post-card-meta span:not(:last-child)::after {
+    content: "·";
+    margin: 0 10px;
+    color: var(--text-4);
+  }
+  .feature-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 28px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--accent-3);
+  }
+  .feature-cta :global(svg) {
+    transition: transform 0.3s var(--ease-out);
+  }
+  .feature:hover .feature-cta :global(svg) {
+    transform: translateX(4px);
+  }
+
+  /* ---------- More posts (when there are any) ---------- */
+  .more {
+    margin-top: 16px;
+  }
+  .post-card {
+    position: relative;
+    padding: 28px;
+    border-radius: var(--radius-xl);
+    background: var(--glass);
+    border: 1px solid var(--line);
+  }
+  .post-card-title {
+    margin: 14px 0 0;
+    font-size: 24px;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+  }
+  .post-card-title a {
+    color: var(--text);
+  }
+  .post-card-title a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .post-card-sub {
+    margin: 10px 0 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+
+  /* ---------- Help centre link ---------- */
+  .help-link {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 20px;
+    margin-top: 16px;
+    padding: 20px 24px;
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--line);
+  }
+  .help-link-icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: rgba(91, 108, 255, 0.14);
+    border: 1px solid rgba(91, 108, 255, 0.3);
+    color: var(--accent-4);
+  }
+  .help-link p {
+    flex: 1 1 320px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-3);
+  }
+  .help-link strong {
+    color: var(--text);
+    font-size: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .feature {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .feature-art {
+      min-height: 260px;
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+  }
+</style>

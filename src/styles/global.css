@@ -429,6 +429,25 @@ sup {
 }
 .data-good { background: rgba(52, 211, 153, 0.1); color: var(--green); }
 .data-accent { background: rgba(91, 108, 255, 0.12); color: var(--accent-4); }
+.data-amber { background: rgba(255, 179, 64, 0.1); color: var(--amber); }
+
+/* Buttons inside mock product UI. Decorative: use <span aria-hidden="true">, never <button>. */
+.mock-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+}
+.mock-btn-primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
 .pill {
   display: inline-flex;
   align-items: center;
@@ -553,9 +572,11 @@ sup {
   height: 34px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.06);
+}
+.faq .plus svg {
   transition: transform 0.4s var(--ease-out);
 }
-.faq details[open] .plus {
+.faq details[open] .plus svg {
   transform: rotate(45deg);
 }
 .faq .answer {

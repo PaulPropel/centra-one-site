@@ -11,7 +11,7 @@ Read this before adding or changing a page. The homepage (`src/pages/index.astro
   - type check: `flock /home/claude/centra-one-site/.build.lock npx astro check`
   - Hold the lock for a build plus screenshots, so nobody rebuilds `dist/` under you:
     `flock /home/claude/centra-one-site/.build.lock sh -c 'npm run build && node <your screenshot script>'`
-- Preview the build with `npx astro preview --port <port> --host 127.0.0.1` (run it in the background). Playwright is installed globally: use `require("playwright")` from a `.cjs` file.
+- Preview the build with `npx astro preview --port <port> --host 127.0.0.1 --ignore-lock` (run it in the background; `--ignore-lock` lets more than one preview run at once). `npm run preview` runs the real Worker with `wrangler dev` instead. Playwright is installed globally: use `require("playwright")` from a `.cjs` file.
 - Vanilla TypeScript only, in Astro `<script>` tags (Astro bundles them into files). No React, no new dependencies.
 
 ## Files you must not edit

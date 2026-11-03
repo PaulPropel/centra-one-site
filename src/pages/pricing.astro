@@ -1,0 +1,349 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import CtaClosing from "../components/CtaClosing.astro";
+import PricingPlans from "../components/PricingPlans.astro";
+import FaqList from "../components/FaqList.astro";
+import CompareTable from "../components/pricing/CompareTable.astro";
+import { plans, AI_ACTIONS_FOOTNOTE, PRICING_FOOTNOTE } from "../data/pricing";
+import { pricingFaq } from "../data/faq";
+import { coreFeatures, comparison, competitors } from "../data/pricing-page";
+import { SITE_URL, COMPANY } from "../data/site";
+
+const pageUrl = `${SITE_URL}/pricing`;
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: COMPANY.name,
+    description: "AI-powered wholesale platform: inventory, quoting, orders, purchasing and a branded B2B portal.",
+    brand: { "@type": "Brand", name: COMPANY.name },
+    url: pageUrl,
+    image: `${SITE_URL}/icon-512.png`,
+    offers: plans.map((p) => ({
+      "@type": "Offer",
+      name: p.name,
+      price: p.price.toFixed(2),
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      url: pageUrl,
+      description: `${p.band.replace(/ revenue$/, " annual revenue")} · ${p.users} users. Billed monthly per organisation.`,
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: p.price.toFixed(2),
+        priceCurrency: "USD",
+        unitCode: "MON",
+        unitText: "month",
+      },
+    })),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: pricingFaq.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a.replace(/<[^>]+>/g, "") },
+    })),
+  },
+];
+
+const reveal = ["rv", "rv2", "rv3", "rv3"];
+---
+
+<BaseLayout
+  title="Pricing"
+  description="Simple pricing from US$59 a month, based on the size of your business. Every plan runs the full platform. 30-day free trial, no credit card."
+  footnotes={[AI_ACTIONS_FOOTNOTE]}
+  notes={[PRICING_FOOTNOTE]}
+  jsonLd={jsonLd}
+>
+  <PageHeader
+    center
+    eyebrow="Pricing"
+    title='Simple, honest pricing.<br><span class="dim">Based on your size.</span>'
+    lead="Priced on the size of your business. Every plan runs the full platform, and bigger plans add more users, Centra AI actions and more hands-on help."
+  />
+
+  <section class="section-tight plans-section" aria-label="Plans">
+    <div class="container">
+      <PricingPlans detailed />
+    </div>
+  </section>
+
+  <section class="section core">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="container relative">
+      <p class="eyebrow rv">On every plan</p>
+      <h2 class="h2 rv mt-24">The core of Centra One.<br /><span class="dim">From day one.</span></h2>
+      <p class="lead rv2 mt-24">
+        Every plan comes with all of this. Growth and Scale build on it with Centra AI actions<sup>1</sup>, multi-currency
+        and landed costs, custom templates and more hands-on support.
+      </p>
+      <div class="core-panel glass mt-48 rv">
+        {
+          coreFeatures.map((g, i) => (
+            <div class:list={["core-col", reveal[i]]}>
+              <h3 class="core-group mono">{g.group}</h3>
+              <ul class="core-list">
+                {g.items.map((item) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight compare" aria-labelledby="compare-title">
+    <div class="container">
+      <p class="eyebrow rv">Comparison</p>
+      <h2 class="h2 rv mt-24" id="compare-title">How Centra One<br /><span class="dim">stacks up.</span></h2>
+      <p class="lead rv2 mt-24">
+        We compared ourselves against the two market leaders. Where we lead, we say so. Where there's a gap, like demand
+        forecasting, we say that too.
+      </p>
+
+      <div class="cmp mt-48">
+        {
+          comparison.map((group) => (
+            <details class="cmp-group rv" open={group.open}>
+              <summary class="cmp-summary">
+                <span class="cmp-title">{group.title}</span>
+                <span class="cmp-count mono">{group.rows.length} features</span>
+                <span class="cmp-plus" aria-hidden="true">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                    <path d="M12 5v14" />
+                    <path d="M5 12h14" />
+                  </svg>
+                </span>
+              </summary>
+              <div class="cmp-body">
+                <CompareTable label={`${group.title}: Centra One compared with Cin7 Core and Unleashed`} first="Feature" columns={competitors} rows={group.rows} />
+              </div>
+            </details>
+          ))
+        }
+      </div>
+      <p class="fine cmp-fine mt-24 rv">
+        Comparison based on publicly available information as of June 2026. Feature availability may vary by plan level.
+      </p>
+
+      <div class="short glass-solid mt-32 rv">
+        <p class="short-label mono">The short version</p>
+        <p class="short-text">
+          Of the three, only Centra One combines an AI assistant that can take action<sup>1</sup>, CPQ-style quoting, a
+          branded B2B customer portal and full batch and expiry tracking in one product. It was built for wholesale from
+          the start, not adapted from older inventory software.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight faq-section">
+    <div class="container container-narrow">
+      <p class="eyebrow center rv">Questions</p>
+      <h2 class="h2 center rv mt-24">Before you<br /><span class="dim">decide.</span></h2>
+      <FaqList items={pricingFaq} openFirst class="mt-48" />
+      <p class="center mt-32 subtle rv">
+        Something else? Browse the <a href="/help">help centre</a> or <a href="/contact">talk to us</a>.
+      </p>
+    </div>
+  </section>
+
+  <CtaClosing
+    title='Start with the <span class="shine">plan that fits.</span>'
+    lead="Setup takes less than a day. Bring your product list and we'll help you import it."
+    secondary={{ label: "Talk to us first", href: "/contact" }}
+    fine="No credit card required · Cancel any time · From US$59 a month"
+  />
+</BaseLayout>
+
+<style>
+  .plans-section {
+    padding-top: 0;
+  }
+
+  /* ---------- Core features ---------- */
+  .core-panel {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: clamp(24px, 3.4vw, 40px);
+  }
+  .core-col {
+    min-width: 0;
+    padding: 0 24px;
+    border-left: 1px solid var(--line);
+  }
+  .core-col:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .core-col:last-child {
+    padding-right: 0;
+  }
+  .core-group {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-3);
+  }
+  .core-list {
+    margin: 18px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    font-size: 15px;
+    line-height: 1.4;
+    color: var(--soft);
+  }
+  .core-list li {
+    position: relative;
+    padding-left: 22px;
+  }
+  .core-list li::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 0.42em;
+    width: 10px;
+    height: 6px;
+    border-left: 2px solid var(--accent-3);
+    border-bottom: 2px solid var(--accent-3);
+    transform: rotate(-45deg);
+  }
+
+  /* ---------- Comparison ---------- */
+  .cmp {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .cmp-group {
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.02);
+    overflow: hidden;
+  }
+  .cmp-group[open] {
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .cmp-summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 64px;
+    padding: 12px 18px 12px 24px;
+    cursor: pointer;
+  }
+  .cmp-summary::-webkit-details-marker {
+    display: none;
+  }
+  .cmp-summary:focus-visible {
+    outline-offset: -3px;
+    border-radius: 22px;
+  }
+  .cmp-title {
+    flex: 1;
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .cmp-count {
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-4);
+  }
+  .cmp-plus {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    transition: transform 0.4s var(--ease-out);
+  }
+  .cmp-group[open] .cmp-plus {
+    transform: rotate(45deg);
+  }
+  .cmp-body {
+    border-top: 1px solid var(--line);
+  }
+  .cmp-fine {
+    color: var(--text-4);
+    line-height: 1.6;
+  }
+  .short {
+    padding: 24px 28px;
+    border-radius: 22px;
+    border-color: rgba(122, 140, 255, 0.35);
+    background: rgba(91, 108, 255, 0.08);
+  }
+  .short-label {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-4);
+  }
+  .short-text {
+    margin: 10px 0 0;
+    max-width: 860px;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  @media (max-width: 1000px) {
+    .core-panel {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      row-gap: 32px;
+    }
+    .core-col:nth-child(3) {
+      padding-left: 0;
+      border-left: 0;
+    }
+    .core-col:nth-child(2) {
+      padding-right: 0;
+    }
+  }
+  @media (max-width: 600px) {
+    .core-panel {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .core-col,
+    .core-col:nth-child(3) {
+      padding: 24px 0 0;
+      border-left: 0;
+      border-top: 1px solid var(--line);
+    }
+    .core-col:first-child {
+      padding-top: 0;
+      border-top: 0;
+    }
+    .cmp-summary {
+      padding-left: 18px;
+      gap: 10px;
+    }
+    .cmp-title {
+      font-size: 17px;
+    }
+    .cmp-count {
+      display: none;
+    }
+    .short {
+      padding: 20px;
+    }
+  }
+</style>

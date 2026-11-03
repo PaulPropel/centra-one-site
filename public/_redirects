@@ -1,0 +1,8 @@
+# Redirects (Cloudflare Workers static assets).
+# The old site served its sitemap at /sitemap.xml; Astro writes /sitemap-index.xml.
+/sitemap.xml /sitemap-index.xml 301
+
+# Handy short links to the app.
+/login https://portal.centra-one.ai/login 302
+/signup https://portal.centra-one.ai/signup 302
+/signin https://portal.centra-one.ai/login 302

@@ -1,0 +1,180 @@
+---
+// One live integration: mark, name, description, a small mock of it working (default slot)
+// and its flow table. `wide` puts the mock in a second column.
+import FlowTable from "./FlowTable.astro";
+import type { LiveIntegration } from "../../data/integrations";
+
+interface Props {
+  item: LiveIntegration;
+  wide?: boolean;
+  class?: string;
+}
+const { item, wide = false, class: className } = Astro.props;
+const hasMock = Astro.slots.has("default");
+---
+
+<article
+  class:list={["lc", `lc-${item.id}`, { "lc-wide": wide && hasMock }, className]}
+  id={item.id}
+  aria-labelledby={`${item.id}-name`}
+>
+  <div class="lc-top">
+    <span class="lc-mark mono" aria-hidden="true">{item.mark}</span>
+    <div class="lc-id">
+      <h3 class="lc-name" id={`${item.id}-name`}>{item.name}</h3>
+      <p class="lc-cat">{item.category}</p>
+    </div>
+    <span class="lc-live mono"><span class="live" aria-hidden="true"></span>Live</span>
+  </div>
+  <p class="lc-desc">{item.desc}</p>
+  {
+    hasMock && (
+      <div class="lc-mock">
+        <slot />
+      </div>
+    )
+  }
+  <div class="lc-flows">
+    <FlowTable name={item.name} flows={item.flows} />
+    {item.footer && <p class="lc-foot mono">{item.footer}</p>}
+  </div>
+</article>
+
+<style>
+  .lc {
+    --brand: var(--accent-3);
+    --brand-text: var(--accent-4);
+    --brand-tint: rgba(91, 108, 255, 0.14);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "top" "desc" "mock" "flows";
+    align-content: start;
+    gap: 24px;
+    padding: clamp(24px, 3.4vw, 40px);
+    border-radius: var(--radius-xl);
+    background: var(--glass);
+    border: 1px solid var(--line);
+    scroll-margin-top: 96px;
+  }
+  .lc-wide {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    grid-template-rows: auto auto auto 1fr;
+    grid-template-areas: "top mock" "desc mock" "flows mock" ". mock";
+    column-gap: clamp(32px, 5vw, 64px);
+  }
+  .lc-xero {
+    --brand: var(--xero);
+    --brand-text: #6fd3f5;
+    --brand-tint: rgba(19, 181, 234, 0.16);
+    background: linear-gradient(180deg, rgba(19, 181, 234, 0.12), rgba(19, 181, 234, 0.02));
+    border-color: rgba(19, 181, 234, 0.25);
+  }
+  .lc-shopify {
+    --brand: var(--shopify);
+    --brand-text: #b9db7c;
+    --brand-tint: rgba(150, 191, 72, 0.16);
+    background: linear-gradient(180deg, rgba(150, 191, 72, 0.12), rgba(150, 191, 72, 0.02));
+    border-color: rgba(150, 191, 72, 0.25);
+  }
+  .lc-bascik {
+    --brand: #ff6a2b;
+    --brand-text: #ff9a6e;
+    --brand-tint: rgba(255, 106, 43, 0.15);
+  }
+  .lc-aramex {
+    --brand: #e4002b;
+    --brand-text: #ff7d93;
+    --brand-tint: rgba(228, 0, 43, 0.16);
+  }
+  .lc-top {
+    grid-area: top;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .lc-mark {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: var(--brand-tint);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-color: color-mix(in srgb, var(--brand) 40%, transparent);
+    color: var(--brand-text);
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .lc-id {
+    flex: 1;
+    min-width: 0;
+  }
+  .lc-name {
+    margin: 0;
+    font-size: clamp(24px, 2.4vw, 30px);
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+    font-weight: 700;
+  }
+  .lc-cat {
+    margin: 4px 0 0;
+    font-size: 14px;
+    color: var(--text-3);
+  }
+  .lc-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 11px;
+    border-radius: 980px;
+    background: rgba(52, 211, 153, 0.1);
+    color: var(--green);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .lc-desc {
+    grid-area: desc;
+    margin: 0;
+    max-width: 560px;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-2);
+  }
+  .lc-mock {
+    grid-area: mock;
+    min-width: 0;
+  }
+  .lc-wide .lc-mock {
+    align-self: center;
+  }
+  .lc-flows {
+    grid-area: flows;
+  }
+  .lc-foot {
+    margin: 12px 0 0;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+
+  @media (max-width: 960px) {
+    .lc-wide {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: none;
+      grid-template-areas: "top" "desc" "mock" "flows";
+    }
+  }
+  @media (max-width: 420px) {
+    .lc-top {
+      flex-wrap: wrap;
+    }
+    .lc-mark {
+      width: 44px;
+      height: 44px;
+    }
+  }
+</style>

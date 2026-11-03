@@ -14,10 +14,13 @@ export default defineConfig({
   },
   integrations: [
     sitemap({
-      filter: (page) => !page.endsWith("/404"),
+      filter: (page) => !page.endsWith("/404") && !page.endsWith("/contact/sent"),
     }),
   ],
   devToolbar: { enabled: false },
+  // Keep curly quotes and ellipses, but never turn "--" into an en or em dash: the site's
+  // copy style has no dashes.
+  markdown: { smartypants: { dashes: false } },
   vite: {
     build: {
       // Never inline scripts or fonts as data: URIs, so the Content-Security-Policy in

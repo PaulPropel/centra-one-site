@@ -1,0 +1,576 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import CtaClosing from "../components/CtaClosing.astro";
+import Icon, { type IconName } from "../components/Icon.astro";
+import LiveCard from "../components/integrations/LiveCard.astro";
+import { live, comingSoon, principles } from "../data/integrations";
+import { SIGNUP_URL } from "../data/site";
+
+const byId = Object.fromEntries(live.map((i) => [i.id, i]));
+const xero = byId.xero;
+const shopify = byId.shopify;
+const bascik = byId.bascik;
+const aramex = byId.aramex;
+const reveal = ["rv", "rv2", "rv3", "rv3"];
+---
+
+<BaseLayout
+  title="Integrations"
+  description="Centra One connects to Xero, Shopify, Bascik Transport and Aramex. See exactly what syncs, in which direction and how often."
+  notes={["Product screens and figures are illustrative."]}
+>
+  <PageHeader
+    eyebrow="Integrations"
+    title='Connected to the tools<br><span class="dim">you already run on.</span>'
+    lead="Your accounting system, your online store, your freight partners. Here's exactly what moves between them and Centra One, and which way it goes."
+  >
+    <div class="btn-row">
+      <a class="btn btn-primary" href={SIGNUP_URL}>Start free trial</a>
+      <a class="btn btn-secondary" href="/contact">Ask about an integration</a>
+    </div>
+  </PageHeader>
+
+  <section class="section-tight live-section" aria-labelledby="live-label">
+    <div class="container">
+      <div class="live-bar rv">
+        <h2 class="eyebrow" id="live-label">Live now</h2>
+        <p class="fine">{live.length} integrations</p>
+      </div>
+
+      <div class="live-grid mt-24">
+        <LiveCard item={xero} wide class="rv">
+          <figure class="xi glass-solid">
+            <figcaption class="sr-only">
+              Example: an invoice with GST on one line and no GST on the other, sent from Centra One to Xero as Awaiting
+              Approval.
+            </figcaption>
+            <div class="mock-head mono">
+              <span>Invoice · INV-2026-0212</span>
+              <span>Pacific Hotels</span>
+            </div>
+            <div class="xi-body">
+              <div class="xi-line xi-line-head mono" aria-hidden="true">
+                <span>Item</span><span>Tax</span><span>Amount</span>
+              </div>
+              <div class="xi-line">
+                <span class="xi-desc">BioGuard Disinfectant 5L × 40</span>
+                <span class="xi-tax mono">GST 15%</span>
+                <span class="xi-amt mono">$1,520.00</span>
+              </div>
+              <div class="xi-line">
+                <span class="xi-desc">Pallet deposit, refundable × 2</span>
+                <span class="xi-tax xi-tax-none mono">No GST</span>
+                <span class="xi-amt mono">$80.00</span>
+              </div>
+              <div class="xi-sum mono">
+                <div><span>GST</span><span>$228.00</span></div>
+                <div class="xi-total"><span>Total</span><span>$1,828.00</span></div>
+              </div>
+            </div>
+            <div class="xi-status mono">
+              <span class="xi-route">
+                Centra One <Icon name="arrow-right" size={13} stroke={2.6} /> <span class="xi-xero">Xero</span>
+              </span>
+              <span class="xi-state"><Icon name="check" size={13} stroke={2.8} /> Awaiting approval</span>
+            </div>
+          </figure>
+        </LiveCard>
+
+        <LiveCard item={shopify} wide class="rv">
+          <figure class="ss glass-solid">
+            <figcaption class="sr-only">
+              Example: stock levels from the Auckland warehouse matching the Shopify Auckland location, an imported
+              Shopify order and tracking sent back on dispatch.
+            </figcaption>
+            <div class="mock-head mono">
+              <span class="ss-live"><span class="live" aria-hidden="true"></span>Stock sync</span>
+              <span>Next in 12 min</span>
+            </div>
+            <div class="ss-body">
+              <p class="ss-map mono">
+                Auckland warehouse <Icon name="arrow-right" size={12} stroke={2.6} /> Shopify · Auckland
+              </p>
+              <div class="ss-table mono">
+                <div class="ss-row ss-row-head" aria-hidden="true">
+                  <span>Product</span><span>Centra One</span><span>Shopify</span>
+                </div>
+                <div class="ss-row"><span>Hand Sanitiser 5L</span><span>96</span><span class="ss-ok">96 ✓</span></div>
+                <div class="ss-row"><span>BioGuard Disinfectant 5L</span><span>58</span><span class="ss-ok">58 ✓</span></div>
+                <div class="ss-row"><span>PalmCare Foam Soap</span><span>31</span><span class="ss-ok">31 ✓</span></div>
+              </div>
+              <div class="ss-events">
+                <p class="data data-good"><span>#1047 → SO-2026-0415</span><span>Imported ✓</span></p>
+                <p class="data"><span>Tracking → Shopify</span><span>On dispatch</span></p>
+              </div>
+            </div>
+          </figure>
+        </LiveCard>
+
+        <div class="carriers">
+          <LiveCard item={bascik} class="rv">
+            <div class="mini" aria-hidden="true">
+              <p class="data"><span>SO-2026-0412 · Dispatch</span><span>4 cartons</span></p>
+              <p class="data data-good"><span>Consignment BT-48213</span><span>Booked ✓</span></p>
+              <p class="data"><span>Tracking → order</span><span>In transit</span></p>
+            </div>
+          </LiveCard>
+          <LiveCard item={aramex} class="rv2">
+            <div class="mini" aria-hidden="true">
+              <p class="data"><span>SO-2026-0418 · Packed</span><span>2 parcels</span></p>
+              <p class="data data-good"><span>Aramex labels</span><span>Printed ✓</span></p>
+              <p class="data"><span>Tracking → order</span><span>In transit</span></p>
+            </div>
+          </LiveCard>
+        </div>
+      </div>
+
+      <p class="legend mono rv">
+        <span><span class="legend-arrow legend-out" aria-hidden="true"><Icon name="arrow-right" size={12} stroke={2.6} /></span>Centra One to partner</span>
+        <span><span class="legend-arrow legend-in" aria-hidden="true"><Icon name="arrow-left" size={12} stroke={2.6} /></span>Partner to Centra One</span>
+      </p>
+    </div>
+  </section>
+
+  <section class="section soon-section">
+    <div class="container">
+      <p class="eyebrow rv">On the way</p>
+      <h2 class="h2 rv mt-24">Coming soon.<br /><span class="dim">In build now.</span></h2>
+      <p class="lead rv2 mt-24">We'd rather tell you what's coming than pretend it's already here.</p>
+      <div class="grid-auto-sm mt-48">
+        {
+          comingSoon.map((c, i) => (
+            <article class:list={["soon", reveal[i]]}>
+              <div class="soon-top">
+                <span class="soon-mark mono" aria-hidden="true">{c.mark}</span>
+                <span class="soon-pill mono">Coming soon</span>
+              </div>
+              <h3 class="soon-name">{c.name}</h3>
+              <p class="soon-body">{c.body}</p>
+              {c.note && <p class="soon-note mono">{c.note}</p>}
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section principles">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="container relative">
+      <p class="eyebrow rv">How we build them</p>
+      <h2 class="h2 rv mt-24">Integrations<br /><span class="dim">that stay correct.</span></h2>
+      <div class="grid-auto mt-48">
+        {
+          principles.map((p, i) => (
+            <article class:list={["tile", "pr-tile", reveal[i]]}>
+              <span class="pr-icon" aria-hidden="true">
+                <Icon name={p.icon as IconName} size={18} />
+              </span>
+              <h3 class="pr-title">{p.title}</h3>
+              <p class="pr-body">{p.body}</p>
+              <p class="data pr-data" aria-hidden="true">
+                <span>{p.k}</span>
+                <span>{p.v}</span>
+              </p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <CtaClosing
+    title='Already running Xero <span class="shine">and Shopify?</span>'
+    lead="Connect both during setup and your stock, orders and invoices line up from day one."
+    secondary={{ label: "Ask about an integration", href: "/contact" }}
+    fine="No credit card required · Cancel any time · From US$59 a month"
+  />
+</BaseLayout>
+
+<style>
+  .live-section {
+    padding-top: 8px;
+  }
+  .live-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .live-grid {
+    display: grid;
+    gap: 16px;
+  }
+  .carriers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  /* Shared mock chrome */
+  .xi,
+  .ss {
+    margin: 0;
+    border-radius: 22px;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 40px 100px -50px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+  }
+  .mock-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 18px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  /* Xero invoice */
+  .xi-body {
+    padding: 10px 18px 16px;
+  }
+  .xi-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto 92px;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 14px;
+  }
+  .xi-line-head {
+    padding: 6px 0 8px;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-4);
+  }
+  .xi-line-head span:last-child,
+  .xi-amt {
+    text-align: right;
+  }
+  .xi-desc {
+    color: var(--text);
+  }
+  .xi-tax {
+    padding: 3px 7px;
+    border-radius: 7px;
+    background: rgba(19, 181, 234, 0.14);
+    color: #6fd3f5;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .xi-tax-none {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--soft);
+  }
+  .xi-line-head span:nth-child(2) {
+    padding: 0 7px;
+  }
+  .xi-amt {
+    color: var(--text);
+    font-size: 13px;
+  }
+  .xi-sum {
+    margin-top: 10px;
+    margin-left: auto;
+    max-width: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-3);
+  }
+  .xi-sum > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .xi-total {
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .xi-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 13px 18px;
+    border-top: 1px solid rgba(19, 181, 234, 0.25);
+    background: rgba(19, 181, 234, 0.08);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .xi-route {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--soft);
+  }
+  .xi-xero {
+    color: #6fd3f5;
+  }
+  .xi-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--green);
+  }
+
+  /* Shopify sync */
+  .ss-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #b9db7c;
+  }
+  .ss-body {
+    padding: 14px 18px 18px;
+  }
+  .ss-map {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .ss-table {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    overflow: hidden;
+    font-size: 13px;
+  }
+  .ss-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 84px 72px;
+    gap: 8px;
+    padding: 11px 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--text);
+  }
+  .ss-row span:not(:first-child) {
+    text-align: right;
+  }
+  .ss-row-head {
+    border-top: 0;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-4);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .ss-ok {
+    color: #b9db7c;
+  }
+  .ss-events {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  /* Carrier minis */
+  .mini {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mini .data,
+  .ss-events .data {
+    text-transform: uppercase;
+  }
+  .mini .data span:last-child,
+  .ss-events .data span:last-child {
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    margin: 24px 0 0;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .legend > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .legend-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+  }
+  .legend-out {
+    background: rgba(91, 108, 255, 0.2);
+    color: var(--accent-4);
+  }
+  .legend-in {
+    background: rgba(52, 211, 153, 0.14);
+    color: var(--green);
+  }
+
+  /* Coming soon: dashed, because they aren't here yet */
+  .soon {
+    display: flex;
+    flex-direction: column;
+    padding: 26px;
+    border-radius: var(--radius-xl);
+    border: 1px dashed rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.015);
+  }
+  .soon-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .soon-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 8px;
+    border-radius: 13px;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    color: var(--text-3);
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .soon-pill {
+    padding: 5px 10px;
+    border-radius: 980px;
+    background: rgba(255, 179, 64, 0.12);
+    color: var(--amber);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .soon-name {
+    margin: 22px 0 0;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    font-weight: 700;
+  }
+  .soon-body {
+    margin: 8px 0 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+  .soon-note {
+    margin: auto 0 0;
+    padding-top: 16px;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--violet-2);
+  }
+
+  /* Principles */
+  .pr-tile {
+    min-height: 0;
+    gap: 0;
+  }
+  .pr-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(91, 108, 255, 0.14);
+    color: var(--accent-4);
+  }
+  .pr-title {
+    margin: 22px 0 0;
+    font-size: 24px;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+  }
+  .pr-body {
+    margin: 10px 0 24px;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+  .pr-data {
+    margin-top: auto;
+  }
+
+  @media (max-width: 860px) {
+    .carriers {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 480px) {
+    .xi-line {
+      grid-template-columns: minmax(0, 1fr) 84px;
+      row-gap: 6px;
+    }
+    .xi-line .xi-tax {
+      grid-row: 2;
+      justify-self: start;
+    }
+    .xi-line .xi-amt {
+      grid-row: 1 / span 2;
+      grid-column: 2;
+      align-self: start;
+    }
+    .xi-line-head span:nth-child(2) {
+      display: none;
+    }
+    .xi-body,
+    .ss-body {
+      padding-inline: 14px;
+    }
+    .ss-row {
+      grid-template-columns: minmax(0, 1fr) 52px 60px;
+      gap: 6px;
+      padding: 10px 12px;
+    }
+    .ss-row:not(.ss-row-head) > span:first-child {
+      font-family: var(--font-sans);
+      font-size: 14px;
+      letter-spacing: -0.01em;
+    }
+    .ss-events .data,
+    .mini .data {
+      font-size: 11.5px;
+    }
+    /* The customer name is in the caption; keep the invoice number on one line. */
+    .xi .mock-head > span:last-child {
+      display: none;
+    }
+  }
+</style>

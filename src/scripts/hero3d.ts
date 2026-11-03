@@ -314,6 +314,8 @@ export function initHero3D(o: Hero3DOptions): () => void {
     [0, 1.3, 10.4, 0, 1.3, 0],
   ];
   const offK = [0.2, 0.2, 0.17, 0.18, 0];
+  // On tall, narrow screens the camera pulls back for the sphere and the logo so they fit.
+  const narrowZoom = [1, 1, 1, 1.3, 1.75];
   const colArr = [CA, CB, CC, CD, CE];
 
   const posOf = (k: number, i: number, rot: number, sway: number, out: number[]) => {
@@ -476,6 +478,10 @@ export function initHero3D(o: Hero3DOptions): () => void {
       k0[2] + (k1[2] - k0[2]) * te,
     );
     camT.set(k0[3] + (k1[3] - k0[3]) * te, k0[4] + (k1[4] - k0[4]) * te, k0[5] + (k1[5] - k0[5]) * te);
+    if (W / H < 0.8) {
+      const zoom = narrowZoom[seg] + (narrowZoom[seg + 1] - narrowZoom[seg]) * te;
+      camP.sub(camT).multiplyScalar(zoom).add(camT);
+    }
     camera.position.copy(camP);
     camera.lookAt(camT);
     const off = wide ? offK[seg] + (offK[seg + 1] - offK[seg]) * te : 0;

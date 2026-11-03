@@ -1,0 +1,603 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import CtaClosing from "../components/CtaClosing.astro";
+import { changelog, changelogCounts, CHANGE_TYPES, type ChangeType } from "../data/changelog";
+import { AI_ACTIONS_FOOTNOTE } from "../data/pricing";
+import { SITE_URL } from "../data/site";
+
+type FilterKey = "all" | ChangeType;
+const filters: { key: FilterKey; label: string }[] = [
+  { key: "all", label: "Everything" },
+  ...(Object.keys(CHANGE_TYPES) as ChangeType[]).map((key) => ({ key, label: CHANGE_TYPES[key].filter })),
+];
+const releases = (n: number) => `${n} ${n === 1 ? "release" : "releases"}`;
+const oldest = changelog[changelog.length - 1];
+const since = oldest ? oldest.label : "";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "Centra One changelog",
+  url: `${SITE_URL}/changelog`,
+  description: "Every Centra One release, newest first.",
+};
+---
+
+<BaseLayout
+  title="Changelog"
+  description={`Every Centra One release since ${since}, newest first: new features, improvements, integrations and Centra AI. Follow along by RSS.`}
+  footnotes={[AI_ACTIONS_FOOTNOTE]}
+  jsonLd={jsonLd}
+>
+  <PageHeader
+    eyebrow="Changelog"
+    title='What we shipped.<br><span class="dim">And when.</span>'
+    lead="Every release, in the open. No quiet feature removals, no vague “performance improvements”."
+  >
+    <div class="btn-row">
+      <a class="btn btn-secondary" href="/rss.xml">
+        <svg class="rss" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1.4" fill="currentColor"></circle></svg>
+        Subscribe with RSS
+      </a>
+      <a class="btn btn-ghost" href="/contact?kind=other#form">Request a feature</a>
+    </div>
+    <p class="fine header-fine">{releases(changelogCounts.all)} since {since}</p>
+  </PageHeader>
+
+  <section class="log-section" aria-label="Releases">
+    <div class="container">
+      <nav class="filters" aria-label="Filter releases" data-log-filters>
+        <ul>
+          {
+            filters.map((f) => (
+              <li>
+                <a
+                  class="filter"
+                  href={f.key === "all" ? "/changelog" : `/changelog?type=${f.key}`}
+                  data-filter={f.key}
+                  aria-current={f.key === "all" ? "true" : undefined}
+                >
+                  <span>{f.label}</span>
+                  <span class="filter-count mono">{changelogCounts[f.key]}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+      <p class="sr-only" role="status" data-log-status></p>
+
+      <div class="log" data-log>
+        <div class="log-rail" aria-hidden="true"><span class="log-fill" data-log-fill></span></div>
+        {
+          changelog.map((month) => (
+            <section class="log-month" data-log-month aria-labelledby={`month-${month.date}`}>
+              <div class="log-head">
+                <h2 class="log-head-title" id={`month-${month.date}`}>
+                  <span class="log-head-month">{month.label.split(" ")[0]}</span>
+                  <span class="log-head-year mono">{month.label.split(" ")[1]}</span>
+                </h2>
+                <p class="log-head-count fine" data-log-count>
+                  {releases(month.entries.length)}
+                </p>
+              </div>
+              <ol class="log-entries">
+                {month.entries.map((e) => (
+                  <li class="log-entry" id={e.id} data-type={e.type}>
+                    <span class="log-dot" aria-hidden="true" />
+                    <article class="log-card rv" aria-labelledby={`${e.id}-title`}>
+                      <div class="log-card-top">
+                        <span class:list={["tag", `tag-${e.type}`]}>{CHANGE_TYPES[e.type].tag}</span>
+                        <a class="log-anchor mono" href={`#${e.id}`} aria-label={`Link to ${e.title}`}>
+                          #
+                        </a>
+                      </div>
+                      <h3 class="log-title" id={`${e.id}-title`}>
+                        {e.title}
+                      </h3>
+                      <p class="log-body">
+                        {e.body}
+                        {e.aiActions && (
+                          <sup>
+                            <a href="#fn-1" aria-label="Footnote 1">
+                              1
+                            </a>
+                          </sup>
+                        )}
+                      </p>
+                    </article>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight follow" aria-labelledby="follow-title">
+    <div class="container">
+      <div class="follow-card rv">
+        <div class="follow-glow" aria-hidden="true"></div>
+        <div class="follow-copy">
+          <p class="eyebrow">Follow along</p>
+          <h2 id="follow-title" class="follow-title">Want to know what's next?</h2>
+          <p class="body mt-16">
+            We publish everything we ship here. If your business needs something, tell us: roadmap decisions are made on
+            what customers actually ask for.
+          </p>
+        </div>
+        <div class="follow-actions">
+          <div class="btn-row">
+            <a class="btn btn-primary" href="/rss.xml">
+              <svg class="rss" aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1.4" fill="currentColor"></circle></svg>
+              Subscribe with RSS
+            </a>
+            <a class="btn btn-secondary" href="/contact?kind=other#form">Request a feature</a>
+          </div>
+          <p class="fine mt-24">{releases(changelogCounts.all)} published since {since}.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CtaClosing />
+</BaseLayout>
+
+<style>
+  .header-fine {
+    margin-top: 22px;
+    color: var(--text-4);
+  }
+
+  /* ---------- Filters ---------- */
+  .log-section {
+    position: relative;
+    padding-bottom: clamp(48px, 6vw, 80px);
+  }
+  .filters ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 8px 0 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--soft);
+    font-size: 15px;
+    font-weight: 500;
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+  }
+  .filter:hover {
+    border-color: rgba(255, 255, 255, 0.24);
+    color: var(--text);
+  }
+  .filter[aria-current="true"] {
+    border-color: rgba(91, 108, 255, 0.6);
+    background: rgba(91, 108, 255, 0.18);
+    color: #fff;
+  }
+  .filter-count {
+    min-width: 28px;
+    padding: 4px 8px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-3);
+    font-size: 12px;
+    text-align: center;
+  }
+  .filter[aria-current="true"] .filter-count {
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+  }
+
+  /* ---------- Timeline ---------- */
+  .log {
+    --head: 200px;
+    --gap: 48px;
+    --rail: calc(var(--head) + var(--gap));
+    position: relative;
+    margin-top: clamp(40px, 6vw, 72px);
+  }
+  .log-rail {
+    position: absolute;
+    top: 8px;
+    bottom: 0;
+    left: var(--rail);
+    width: 2px;
+    margin-left: -1px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, var(--line-2), rgba(255, 255, 255, 0.04));
+  }
+  .log-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2px;
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(180deg, rgba(139, 155, 255, 0.2), var(--accent-3) 30%, #c7d0ff);
+    box-shadow: 0 0 12px rgba(91, 108, 255, 0.8), 0 0 32px rgba(26, 26, 255, 0.55);
+  }
+  .log-fill::after {
+    content: "";
+    position: absolute;
+    left: -4px;
+    bottom: -5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(139, 155, 255, 0.3), 0 0 22px 4px rgba(139, 155, 255, 0.9);
+  }
+  .log.is-live .log-fill {
+    height: var(--fill, 0px);
+  }
+
+  .log-month {
+    display: grid;
+    grid-template-columns: var(--head) minmax(0, 1fr);
+    column-gap: var(--gap);
+    padding-bottom: clamp(32px, 5vw, 56px);
+  }
+  .log-month[hidden] {
+    display: none;
+  }
+  .log-head {
+    position: sticky;
+    top: 108px;
+    align-self: start;
+    padding-top: 18px;
+    text-align: right;
+  }
+  .log-head-title {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  .log-head-month {
+    font-size: clamp(30px, 3vw, 40px);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    font-weight: 700;
+  }
+  .log-head-year {
+    order: -1;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--accent-3);
+  }
+  .log-head-count {
+    margin-top: 10px;
+    color: var(--text-4);
+  }
+
+  .log-entries {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .log-entry {
+    position: relative;
+    padding-left: 40px;
+    scroll-margin-top: 112px;
+  }
+  .log-entry[hidden] {
+    display: none;
+  }
+  .log-dot {
+    --c: var(--accent-4);
+    position: absolute;
+    left: -7px;
+    top: 30px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--c);
+    background: var(--c);
+    box-shadow: 0 0 0 4px var(--bg), 0 0 16px var(--c);
+    transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  .log.is-live .log-entry:not(.is-lit) .log-dot {
+    border-color: #3a4158;
+    background: var(--bg);
+    box-shadow: 0 0 0 4px var(--bg);
+  }
+  .log-entry[data-type="imp"] .log-dot {
+    --c: var(--green);
+  }
+  .log-entry[data-type="int"] .log-dot {
+    --c: #6fd3f5;
+  }
+  .log-entry[data-type="ai"] .log-dot {
+    --c: var(--violet-2);
+  }
+
+  .log-card {
+    padding: 22px 26px 24px;
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--line);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  .log-entry:target .log-card {
+    border-color: rgba(122, 140, 255, 0.85);
+    box-shadow: 0 0 0 1px rgba(122, 140, 255, 0.4), 0 30px 80px -40px rgba(26, 26, 255, 0.9);
+  }
+  .log-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 10px;
+    border-radius: 980px;
+    font: 500 11px/1.2 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: rgba(91, 108, 255, 0.18);
+    color: var(--accent-4);
+  }
+  .tag-imp {
+    background: rgba(52, 211, 153, 0.12);
+    color: #7ee8bf;
+  }
+  .tag-int {
+    background: rgba(19, 181, 234, 0.14);
+    color: #8fdcf6;
+  }
+  .tag-ai {
+    background: rgba(167, 139, 250, 0.16);
+    color: var(--violet-2);
+  }
+  .log-anchor {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin: -6px -10px -6px 0;
+    border-radius: 12px;
+    color: var(--text-4);
+    font-size: 16px;
+    opacity: 0;
+    transition: opacity 0.2s ease, color 0.2s ease, background 0.2s ease;
+  }
+  .log-card:hover .log-anchor,
+  .log-anchor:focus-visible {
+    opacity: 1;
+  }
+  .log-anchor:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+  }
+  .log-title {
+    margin: 14px 0 0;
+    font-size: clamp(21px, 2vw, 25px);
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+  }
+  .log-body {
+    margin: 10px 0 0;
+    max-width: 680px;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-2);
+  }
+  .log-body sup a {
+    padding: 0 2px;
+  }
+
+  @media (max-width: 900px) {
+    .log {
+      --rail: 7px;
+    }
+    .log-month {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .log-head {
+      position: relative;
+      top: auto;
+      padding: 0 0 18px 40px;
+      text-align: left;
+    }
+    .log-head::before {
+      content: "";
+      position: absolute;
+      left: 1px;
+      top: 6px;
+      width: 12px;
+      height: 12px;
+      border-radius: 4px;
+      background: var(--bg);
+      border: 2px solid var(--accent-3);
+    }
+    .log-head-title {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .log-head-year {
+      order: 0;
+      margin: 0;
+    }
+    .log-head-count {
+      margin-top: 6px;
+    }
+    .log-dot {
+      left: 0;
+    }
+    .log-card {
+      padding: 18px 18px 20px;
+    }
+    .log-anchor {
+      opacity: 1;
+    }
+  }
+  @media (hover: none) {
+    .log-anchor {
+      opacity: 1;
+    }
+  }
+
+  /* ---------- Follow along ---------- */
+  .follow-card {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px;
+    padding: clamp(28px, 5vw, 52px);
+    border-radius: var(--radius-xl);
+    background: var(--glass);
+    border: 1px solid rgba(91, 108, 255, 0.3);
+  }
+  .follow-glow {
+    position: absolute;
+    left: -160px;
+    bottom: -300px;
+    width: 640px;
+    height: 640px;
+    pointer-events: none;
+    background: radial-gradient(closest-side, rgba(26, 26, 255, 0.3), rgba(26, 26, 255, 0));
+    filter: blur(10px);
+  }
+  .follow-copy {
+    position: relative;
+    flex: 1 1 420px;
+    max-width: 600px;
+  }
+  .follow-title {
+    margin: 16px 0 0;
+    font-size: clamp(32px, 4vw, 52px);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-weight: 700;
+  }
+  .follow-actions {
+    position: relative;
+  }
+  .follow-actions .fine {
+    color: var(--text-4);
+  }
+  .rss {
+    flex: none;
+  }
+</style>
+
+<script>
+  type Key = "all" | "new" | "imp" | "int" | "ai";
+  const KEYS: Key[] = ["all", "new", "imp", "int", "ai"];
+
+  const log = document.querySelector<HTMLElement>("[data-log]");
+  const fill = document.querySelector<HTMLElement>("[data-log-fill]");
+  const status = document.querySelector<HTMLElement>("[data-log-status]");
+  const filterLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>("[data-filter]"));
+  const months = Array.from(document.querySelectorAll<HTMLElement>("[data-log-month]"));
+  const entries = Array.from(document.querySelectorAll<HTMLElement>(".log-entry"));
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const releases = (n: number) => `${n} ${n === 1 ? "release" : "releases"}`;
+
+  // ---- Glowing line: fills to a playhead a little below the middle of the screen ----
+  let queued = false;
+  const paintLine = () => {
+    queued = false;
+    if (!log || !fill || reduce) return;
+    const playhead = window.innerHeight * 0.58;
+    const box = log.getBoundingClientRect();
+    const height = Math.max(0, Math.min(box.height, playhead - box.top));
+    log.style.setProperty("--fill", `${height}px`);
+    for (const entry of entries) {
+      if (entry.hidden) continue;
+      const dot = entry.querySelector<HTMLElement>(".log-dot");
+      if (dot) entry.classList.toggle("is-lit", dot.getBoundingClientRect().top < playhead);
+    }
+  };
+  const schedule = () => {
+    if (!queued) {
+      queued = true;
+      requestAnimationFrame(paintLine);
+    }
+  };
+  if (log && fill && !reduce) {
+    log.classList.add("is-live");
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    paintLine();
+  }
+
+  // ---- Filters: plain links without JavaScript; with it, filter in place ----
+  const apply = (key: Key, updateUrl: boolean) => {
+    let shown = 0;
+    for (const month of months) {
+      let n = 0;
+      month.querySelectorAll<HTMLElement>(".log-entry").forEach((entry) => {
+        const show = key === "all" || entry.dataset.type === key;
+        entry.hidden = !show;
+        if (show) n += 1;
+      });
+      month.hidden = n === 0;
+      const count = month.querySelector<HTMLElement>("[data-log-count]");
+      if (count) count.textContent = releases(n);
+      shown += n;
+    }
+    for (const link of filterLinks) {
+      if (link.dataset.filter === key) link.setAttribute("aria-current", "true");
+      else link.removeAttribute("aria-current");
+    }
+    if (status) {
+      const label = filterLinks.find((l) => l.dataset.filter === key)?.querySelector("span")?.textContent ?? "";
+      status.textContent = key === "all" ? `Showing all ${releases(shown)}` : `Showing ${releases(shown)}: ${label}`;
+    }
+    if (updateUrl) {
+      const url = new URL(window.location.href);
+      if (key === "all") url.searchParams.delete("type");
+      else url.searchParams.set("type", key);
+      history.replaceState(history.state, "", `${url.pathname}${url.search}`);
+    }
+    schedule();
+  };
+
+  for (const link of filterLinks) {
+    link.addEventListener("click", (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // let new-tab clicks through
+      e.preventDefault();
+      apply((link.dataset.filter as Key) ?? "all", true);
+    });
+  }
+
+  const requested = new URLSearchParams(window.location.search).get("type") as Key | null;
+  const target = window.location.hash ? document.getElementById(decodeURIComponent(window.location.hash.slice(1))) : null;
+  if (requested && KEYS.includes(requested) && requested !== "all") {
+    // A shared link to one entry wins over a filter that would hide it.
+    const hidesTarget = target?.classList.contains("log-entry") && target.dataset.type !== requested;
+    if (!hidesTarget) {
+      apply(requested, false);
+      target?.scrollIntoView();
+    }
+  }
+</script>

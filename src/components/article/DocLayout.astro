@@ -1,0 +1,56 @@
+---
+// Reading layout for long-form pages: the article in the 720px measure, with "On this page"
+// sticky beside it on wide screens and folded above it on narrow ones.
+import Toc from "./Toc.astro";
+import type { Heading } from "./longform";
+
+interface Props {
+  headings: Heading[];
+}
+const { headings } = Astro.props;
+---
+
+<div class="doc-wrap">
+  <div class="container">
+    <div class="doc">
+      <div class="doc-main">
+        <Toc headings={headings} variant="inline" class="doc-toc-inline" />
+        <slot />
+      </div>
+      <div class="doc-aside">
+        <Toc headings={headings} />
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .doc-wrap {
+    padding-top: clamp(40px, 6vw, 72px);
+  }
+  .doc {
+    display: grid;
+    grid-template-columns: minmax(0, 720px) 232px;
+    justify-content: space-between;
+    gap: 64px;
+  }
+  .doc-main {
+    min-width: 0;
+  }
+  .doc-main :global(.doc-toc-inline) {
+    margin-bottom: 36px;
+  }
+  @media (min-width: 1080px) {
+    .doc-main :global(.doc-toc-inline) {
+      display: none;
+    }
+  }
+  @media (max-width: 1079px) {
+    .doc {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .doc-aside {
+      display: none;
+    }
+  }
+</style>

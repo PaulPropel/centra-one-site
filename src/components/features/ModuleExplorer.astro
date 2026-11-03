@@ -1,0 +1,517 @@
+---
+// The module explorer on /features. Without JavaScript every module is shown, stacked, each
+// with its own heading. With it, the modules become tabs (role="tablist"/"tab"/"tabpanel",
+// arrow keys, Home and End), and a URL hash naming a module (/features#inventory) selects it.
+import Icon, { type IconName } from "../Icon.astro";
+import { modules } from "../../data/features";
+---
+
+<div class="ex" data-ex>
+  <div class="ex-tabs" role="tablist" aria-label="Platform modules" data-ex-tabs hidden>
+    {
+      modules.map((m, i) => (
+        <button
+          type="button"
+          role="tab"
+          class="ex-tab"
+          id={`tab-${m.id}`}
+          aria-controls={`panel-${m.id}`}
+          aria-selected={i === 0 ? "true" : "false"}
+          tabindex={i === 0 ? 0 : -1}
+          aria-label={`${m.label}, ${m.features.length} features`}
+          data-ex-tab={m.id}
+        >
+          <Icon name={m.icon as IconName} size={17} />
+          <span class="ex-tab-label">{m.label}</span>
+          <span class="ex-tab-count mono" aria-hidden="true">{m.features.length}</span>
+        </button>
+      ))
+    }
+  </div>
+
+  <div class="ex-panels">
+    {
+      modules.map((m) => (
+        <section class="ex-panel" id={`panel-${m.id}`} aria-labelledby={`${m.id}-title`} data-ex-panel={m.id}>
+          {/* The hash target (/features#inventory). It isn't focusable, so arriving by link draws no focus ring. */}
+          <div class="ex-inner" id={m.id}>
+            <div class="ex-copy">
+              <p class="eyebrow ex-eyebrow">
+                <Icon name={m.icon as IconName} size={15} />
+                {m.label}
+              </p>
+              <h2 class="h3 ex-title" id={`${m.id}-title`}>
+                {m.title}
+              </h2>
+              <p class="body ex-blurb" set:html={m.blurb} />
+              <div class="ex-data" aria-hidden="true">
+                {m.data.map((d) => (
+                  <p class:list={["data", { "data-good": d.tone === "good", "data-accent": d.tone === "accent", "data-amber": d.tone === "amber" }]}>
+                    <span>{d.k}</span>
+                    <span>{d.v}</span>
+                  </p>
+                ))}
+              </div>
+              {m.link && (
+                <a class="ex-link" href={m.link.href}>
+                  {m.link.label} <span aria-hidden="true">→</span>
+                </a>
+              )}
+            </div>
+
+            <div class="ex-window">
+              <div class="ex-window-head mono" aria-hidden="true">
+                <span>
+                  CENTRA ONE <span class="ex-slash">/</span> {m.label.toUpperCase()}
+                </span>
+                <span>{m.features.length} FEATURES</span>
+              </div>
+              <ul class="ex-list">
+                {m.features.map((f, k) => (
+                  <li class:list={["ex-item", { "is-roadmap": f.roadmap }]} style={`--i: ${k}`}>
+                    <span class="ex-mark" aria-hidden="true">
+                      <Icon name={f.roadmap ? "clock" : "check"} size={14} stroke={2.6} />
+                    </span>
+                    <span class="ex-name">{f.name}</span>
+                    {(f.note || f.growth || f.roadmap) && (
+                      <span class="ex-tags">
+                        {f.note && <span class="ex-tag ex-note">{f.note}</span>}
+                        {f.growth && (
+                          <span class="ex-tag ex-plan">
+                            <span class="sr-only">Available on </span>Growth and Scale
+                            {f.footnote && <sup>1</sup>}
+                          </span>
+                        )}
+                        {f.roadmap && <span class="ex-tag ex-road">On the roadmap</span>}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  /* ---------- Tabs (only shown once the script has enhanced the explorer) ---------- */
+  .ex-tabs {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+    padding: 6px;
+    border-radius: 22px;
+    background: rgba(14, 16, 28, 0.62);
+    border: 1px solid var(--line);
+  }
+  .ex-tabs[hidden] {
+    display: none;
+  }
+  .ex-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 50px;
+    padding: 0 12px;
+    border-radius: 16px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-3);
+    font: 600 14px/1.2 var(--font-sans);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+  }
+  .ex-tab:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .ex-tab[aria-selected="true"] {
+    color: #fff;
+    background: rgba(91, 108, 255, 0.18);
+    border-color: rgba(122, 140, 255, 0.55);
+  }
+  .ex-tab :global(.icon) {
+    flex: none;
+  }
+  .ex-tab-count {
+    min-width: 24px;
+    padding: 3px 7px;
+    border-radius: 980px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-3);
+    font-size: 11px;
+    line-height: 1.2;
+    text-align: center;
+  }
+  .ex-tab[aria-selected="true"] .ex-tab-count {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* ---------- Panels ---------- */
+  .ex-panels {
+    display: grid;
+    gap: clamp(64px, 9vw, 112px);
+  }
+  .is-tabs .ex-panels {
+    margin-top: 28px;
+  }
+  /* All panels share one cell, so the explorer is as tall as its tallest module and the page
+     below never jumps when the tab changes. Inactive panels are hidden and inert. */
+  .is-tabs .ex-panel {
+    grid-area: 1 / 1;
+  }
+  /* Land a hash jump with the tab bar still in view (the script measures it). */
+  .is-tabs .ex-inner {
+    scroll-margin-top: var(--ex-offset, 92px);
+  }
+  .is-tabs .ex-panel[data-inactive] {
+    visibility: hidden;
+  }
+  .ex-panel {
+    border-radius: 28px;
+  }
+  .ex-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    gap: clamp(28px, 5vw, 64px);
+    align-items: start;
+  }
+  .ex-panel:focus-visible {
+    outline-offset: 8px;
+  }
+  .ex-copy {
+    padding-top: 8px;
+  }
+  .ex-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ex-title {
+    margin-top: 16px;
+    font-size: clamp(30px, 3.4vw, 44px);
+    line-height: 1.02;
+    letter-spacing: -0.045em;
+  }
+  .ex-blurb {
+    margin-top: 18px;
+    max-width: 460px;
+  }
+  .ex-data {
+    margin-top: 28px;
+    max-width: 460px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .ex-data .data span:last-child {
+    text-align: right;
+    white-space: nowrap;
+  }
+  .data-amber {
+    background: rgba(255, 179, 64, 0.1);
+    color: var(--amber);
+  }
+  .ex-link {
+    display: inline-flex;
+    gap: 6px;
+    margin-top: 22px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  /* The feature list, styled like a screen in the app */
+  .ex-window {
+    border-radius: 24px;
+    background: var(--glass-solid);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 50px 120px -60px rgba(26, 26, 255, 0.65);
+    overflow: hidden;
+  }
+  .ex-window-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 20px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--text-4);
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .ex-slash {
+    color: #3a4158;
+  }
+  .ex-list {
+    margin: 0;
+    padding: 4px 8px 8px;
+    list-style: none;
+  }
+  .ex-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 10px 12px;
+  }
+  .ex-item + .ex-item {
+    border-top: 1px solid rgba(255, 255, 255, 0.055);
+  }
+  .ex-mark {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    background: rgba(91, 108, 255, 0.16);
+    color: var(--accent-4);
+  }
+  .ex-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--text);
+  }
+  .ex-tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+  .ex-tag {
+    padding: 4px 8px;
+    border-radius: 8px;
+    font: 500 11px/1.3 var(--font-mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .ex-note {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--line);
+    color: var(--soft);
+  }
+  .ex-plan {
+    background: rgba(167, 139, 250, 0.15);
+    color: var(--violet-2);
+  }
+  .ex-road {
+    background: rgba(255, 179, 64, 0.12);
+    color: var(--amber);
+  }
+  .is-roadmap .ex-mark {
+    background: rgba(255, 179, 64, 0.14);
+    color: var(--amber);
+  }
+  .is-roadmap .ex-name {
+    color: var(--text-3);
+  }
+
+  /* Switching modules: the new list arrives row by row. */
+  .ex-panel.is-entering .ex-copy {
+    animation: ex-copy 0.5s var(--ease-out) both;
+  }
+  .ex-panel.is-entering .ex-item {
+    animation: ex-row 0.55s var(--ease-out) both;
+    animation-delay: calc(40ms + var(--i, 0) * 38ms);
+  }
+  @keyframes ex-row {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes ex-copy {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (max-width: 1040px) {
+    .ex-tabs {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 900px) {
+    .ex-inner {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    /* On a phone the modules differ a lot in height, so hidden ones take no space. */
+    .is-tabs .ex-panel[data-inactive] {
+      display: none;
+    }
+  }
+  @media (max-width: 600px) {
+    .ex-tabs {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      border-radius: 20px;
+    }
+    .ex-tab {
+      justify-content: space-between;
+      gap: 6px;
+      padding: 0 10px 0 12px;
+      font-size: 13.5px;
+    }
+    .ex-tab > :global(.icon) {
+      display: none;
+    }
+    .ex-item {
+      flex-wrap: wrap;
+      align-items: flex-start;
+      row-gap: 8px;
+    }
+    .ex-name {
+      flex-basis: calc(100% - 36px);
+      padding-top: 2px;
+    }
+    .ex-tags {
+      flex-basis: 100%;
+      justify-content: flex-start;
+      padding-left: 36px;
+    }
+    .ex-tag {
+      white-space: normal;
+    }
+    .ex-window-head > span:last-child {
+      display: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ex-panel.is-entering .ex-copy,
+    .ex-panel.is-entering .ex-item {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  for (const root of document.querySelectorAll<HTMLElement>("[data-ex]")) {
+    const tablist = root.querySelector<HTMLElement>("[data-ex-tabs]");
+    const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>("[data-ex-tab]"));
+    const panels = Array.from(root.querySelectorAll<HTMLElement>("[data-ex-panel]"));
+    if (!tablist || !tabs.length || tabs.length !== panels.length) continue;
+    const ids = tabs.map((t) => t.dataset.exTab || "");
+
+    let current = -1;
+    const select = (index: number, opts: { focus?: boolean; animate?: boolean; hash?: boolean } = {}) => {
+      if (index < 0 || index >= tabs.length) return;
+      const changed = index !== current;
+      current = index;
+      tabs.forEach((tab, i) => {
+        const on = i === index;
+        tab.setAttribute("aria-selected", String(on));
+        tab.tabIndex = on ? 0 : -1;
+      });
+      panels.forEach((panel, i) => {
+        const on = i === index;
+        panel.toggleAttribute("data-inactive", !on);
+        panel.inert = !on;
+        if (on && changed && opts.animate && !reduce) {
+          panel.classList.remove("is-entering");
+          void panel.offsetWidth; // restart the row animation
+          panel.classList.add("is-entering");
+        }
+      });
+      if (opts.focus) tabs[index].focus();
+      if (opts.hash && changed) history.replaceState(null, "", `#${ids[index]}`);
+    };
+
+    const fromHash = () => {
+      let id = "";
+      try {
+        id = decodeURIComponent(location.hash.slice(1));
+      } catch {
+        return -1;
+      }
+      return ids.indexOf(id);
+    };
+
+    // Enhance: show the tabs and turn each module into a tab panel.
+    tablist.hidden = false;
+    root.classList.add("is-tabs");
+    const setOffset = () => root.style.setProperty("--ex-offset", `${tablist.offsetHeight + 28}px`);
+    setOffset();
+    let resizeQueued = false;
+    window.addEventListener("resize", () => {
+      if (resizeQueued) return;
+      resizeQueued = true;
+      requestAnimationFrame(() => {
+        resizeQueued = false;
+        setOffset();
+      });
+    });
+    panels.forEach((panel, i) => {
+      panel.setAttribute("role", "tabpanel");
+      panel.setAttribute("aria-labelledby", tabs[i].id);
+      panel.tabIndex = 0;
+    });
+
+    const initial = fromHash();
+    select(initial >= 0 ? initial : 0);
+    if (initial >= 0) {
+      // The layout just changed under the browser's own jump to the hash, so line it up again.
+      const align = () => root.scrollIntoView({ block: "start" });
+      requestAnimationFrame(align);
+      window.addEventListener("load", () => fromHash() >= 0 && window.scrollY > 0 && align(), { once: true });
+    }
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener("click", () => select(i, { animate: true, hash: true }));
+    });
+
+    tablist.addEventListener("keydown", (event) => {
+      const last = tabs.length - 1;
+      let next: number;
+      switch (event.key) {
+        case "ArrowRight":
+        case "ArrowDown":
+          next = current >= last ? 0 : current + 1;
+          break;
+        case "ArrowLeft":
+        case "ArrowUp":
+          next = current <= 0 ? last : current - 1;
+          break;
+        case "Home":
+          next = 0;
+          break;
+        case "End":
+          next = last;
+          break;
+        default:
+          return;
+      }
+      event.preventDefault();
+      select(next, { focus: true, animate: true, hash: true });
+    });
+
+    // In-page links such as <a href="#purchasing"> pick the module too.
+    window.addEventListener("hashchange", () => {
+      const index = fromHash();
+      if (index < 0) return;
+      select(index, { animate: true });
+      root.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+    });
+  }
+</script>

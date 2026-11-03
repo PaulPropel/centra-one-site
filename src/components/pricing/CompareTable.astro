@@ -1,0 +1,166 @@
+---
+// A comparison grid with our column highlighted. Used on /pricing (inside <details> groups)
+// and /ai. It's an ARIA table built from divs so it can restack on a phone: the feature
+// name goes full width and the three values sit underneath, under the same column heads.
+import Icon from "../Icon.astro";
+import type { CompareCell } from "../../data/pricing-page";
+
+interface Props {
+  /** Accessible name for the table. */
+  label: string;
+  /** Heading for the first column ("Feature", "Capability"). */
+  first: string;
+  /** Value column headings; the first one is ours and is highlighted. */
+  columns: string[];
+  rows: Array<{ feature: string; cells: CompareCell[] }>;
+  class?: string;
+}
+const { label, first, columns, rows, class: className } = Astro.props;
+---
+
+<div class:list={["ct", className]} role="table" aria-label={label}>
+  <div class="ct-row ct-head" role="row">
+    <span class="ct-feat" role="columnheader">{first}</span>
+    {
+      columns.map((c, i) => (
+        <span class:list={["ct-val", { "ct-us": i === 0 }]} role="columnheader">
+          {c}
+        </span>
+      ))
+    }
+  </div>
+  {
+    rows.map((row) => (
+      <div class="ct-row" role="row">
+        <span class="ct-feat" role="rowheader">
+          {row.feature}
+        </span>
+        {row.cells.map((cell, i) => {
+          const tone = cell.tone ?? "plain";
+          return (
+            <span class:list={["ct-val", `t-${tone}`, { "ct-us": i === 0 }]} role="cell">
+              {tone === "yes" && <Icon name="check" size={14} stroke={2.6} class="ct-icon" />}
+              {tone === "no" && (cell.text === "None" || cell.text === "No") && (
+                <Icon name="x" size={14} stroke={2.4} class="ct-icon" />
+              )}
+              <span>
+                {cell.text}
+                {cell.footnote && <sup>{cell.footnote}</sup>}
+              </span>
+              {cell.growth && (
+                <span class="ct-plan mono">
+                  <span class="sr-only">Available on </span>Growth and Scale
+                </span>
+              )}
+            </span>
+          );
+        })}
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .ct {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+  .ct-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) repeat(3, minmax(0, 1fr));
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .ct-head {
+    border-top: 0;
+  }
+  .ct-feat,
+  .ct-val {
+    min-width: 0;
+    padding: 14px 18px;
+  }
+  .ct-feat {
+    color: var(--text);
+    font-weight: 500;
+  }
+  .ct-val {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    align-content: flex-start;
+    gap: 6px 8px;
+    color: var(--text-2);
+  }
+  .ct-head > span {
+    padding-block: 12px;
+    font: 500 11px/1.4 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-4);
+  }
+  .ct-head > .ct-us {
+    color: var(--accent-4);
+  }
+  /* Our column: one continuous tinted band */
+  .ct-us {
+    background: rgba(91, 108, 255, 0.1);
+    box-shadow: inset 1px 0 0 rgba(122, 140, 255, 0.28), inset -1px 0 0 rgba(122, 140, 255, 0.28);
+  }
+  .t-own {
+    color: var(--accent-4);
+    font-weight: 600;
+  }
+  .t-yes {
+    color: var(--green);
+  }
+  .t-no {
+    color: var(--text-4);
+  }
+  .ct-val :global(.ct-icon) {
+    flex: none;
+  }
+  .ct-plan {
+    padding: 3px 7px;
+    border-radius: 7px;
+    background: rgba(167, 139, 250, 0.15);
+    color: var(--violet-2);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 640px) {
+    .ct {
+      font-size: 14px;
+    }
+    .ct-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .ct-row > .ct-feat {
+      grid-column: 1 / -1;
+      padding: 14px 14px 6px;
+    }
+    /* The empty corner heading is still announced, just not shown. */
+    .ct-head > .ct-feat {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+    }
+    .ct-val {
+      padding: 8px 12px 14px;
+      font-size: 13.5px;
+    }
+    .ct-head > .ct-val {
+      padding: 10px 12px;
+      font-size: 10px;
+    }
+    .ct-plan {
+      white-space: normal;
+    }
+  }
+</style>

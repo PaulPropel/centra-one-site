@@ -1,0 +1,897 @@
+---
+// The /contact enquiry router: one real <form> that posts to the enquiry Worker
+// (worker/index.ts, POST /api/enquiry).
+//
+// Without JavaScript it's a plain form: a "What do you need?" select and every field, posted
+// by the browser. The Worker then redirects to /contact/sent, or back here with ?error=.
+// With JavaScript it becomes a six-way router (aria-pressed buttons, arrow keys) that shows
+// only the fields each kind of enquiry needs, and sends with fetch so the answer shows in place.
+//
+// Visibility: elements with data-for="<kinds>" belong to those enquiry types. Without
+// JavaScript every field shows; with it, the script marks the current ones with .is-on.
+// Browsers that support (scripting: enabled) start in the default "demo" layout, so nothing
+// jumps while the script loads.
+import Icon from "../Icon.astro";
+import { enquiryRoutes, revenueBands, fieldLimits, workerErrors, type EnquiryField } from "../../data/contact";
+import { EMAIL, REPLY_TIME } from "../../data/site";
+
+const first = enquiryRoutes[0];
+const kindsFor = (field: EnquiryField) =>
+  enquiryRoutes
+    .filter((r) => r.fields.includes(field))
+    .map((r) => r.kind)
+    .join(" ");
+const routeData = JSON.stringify(
+  enquiryRoutes.map((r) => ({ kind: r.kind, title: r.title, label: r.messageLabel, placeholder: r.messagePlaceholder })),
+);
+---
+
+<form
+  id="form"
+  class="enq"
+  method="post"
+  action="/api/enquiry"
+  data-enq
+  data-kind={first.kind}
+  data-routes={routeData}
+  data-errors={JSON.stringify(workerErrors)}
+  data-email={EMAIL.hello}
+>
+  <div class="enq-top">
+    <label class="enq-q" id="enq-q" for="enq-kind">What do you need?</label>
+    <p class="enq-promise"><span class="dot" aria-hidden="true"></span>A real person replies {REPLY_TIME}</p>
+  </div>
+
+  <div class="enq-body">
+    <div class="enq-router" role="group" aria-labelledby="enq-q" data-router>
+      {
+        enquiryRoutes.map((r, i) => (
+          <button
+            type="button"
+            class="enq-route"
+            aria-pressed={i === 0 ? "true" : "false"}
+            aria-labelledby={`enq-rt-${r.kind}`}
+            aria-describedby={`enq-rs-${r.kind}`}
+            data-route={r.kind}
+          >
+            <span class="enq-route-icon">
+              <Icon name={r.icon} size={18} />
+            </span>
+            <span class="enq-route-title" id={`enq-rt-${r.kind}`}>
+              {r.title}
+            </span>
+            <span class="enq-route-sub" id={`enq-rs-${r.kind}`}>
+              {r.subtitle}
+            </span>
+            <span class="enq-route-check" aria-hidden="true">
+              <Icon name="check" size={13} stroke={3} />
+            </span>
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="field enq-kind">
+      <select id="enq-kind" class="select" name="kind">
+        {enquiryRoutes.map((r) => <option value={r.kind}>{r.option}</option>)}
+      </select>
+    </div>
+
+    <div class="enq-fields">
+      <div class="form-grid">
+        <div class="field">
+          <label for="enq-name">Your name <span class="enq-req" aria-hidden="true">*</span></label>
+          <input
+            id="enq-name"
+            class="input"
+            type="text"
+            name="name"
+            autocomplete="name"
+            placeholder="Jane Smith"
+            required
+            maxlength={fieldLimits.name}
+          />
+        </div>
+        <div class="field">
+          <label for="enq-email">Work email <span class="enq-req" aria-hidden="true">*</span></label>
+          <input
+            id="enq-email"
+            class="input"
+            type="email"
+            name="email"
+            autocomplete="email"
+            placeholder="jane@company.co.nz"
+            spellcheck="false"
+            required
+            maxlength={fieldLimits.email}
+          />
+        </div>
+      </div>
+
+      <div class="field" data-for={kindsFor("company")}>
+        <label for="enq-company">Company</label>
+        <input
+          id="enq-company"
+          class="input"
+          type="text"
+          name="company"
+          autocomplete="organization"
+          placeholder="Your business name"
+          maxlength={fieldLimits.company}
+        />
+      </div>
+
+      <div class="field" data-for={kindsFor("revenue")}>
+        <label for="enq-revenue">Annual revenue</label>
+        <select id="enq-revenue" class="select" name="revenue">
+          <option value="">Select a range</option>
+          {revenueBands.map((band) => <option value={band}>{band}</option>)}
+        </select>
+      </div>
+
+      <div class="form-grid" data-for={kindsFor("users")}>
+        <div class="field">
+          <label for="enq-users">Users needed<span class="nojs-only"> (enterprise)</span></label>
+          <input
+            id="enq-users"
+            class="input"
+            type="text"
+            name="users"
+            inputmode="numeric"
+            placeholder="e.g. 25"
+            maxlength={fieldLimits.users}
+          />
+        </div>
+        <div class="field">
+          <label for="enq-warehouses">Warehouses<span class="nojs-only"> (enterprise)</span></label>
+          <input
+            id="enq-warehouses"
+            class="input"
+            type="text"
+            name="warehouses"
+            inputmode="numeric"
+            placeholder="e.g. 3"
+            maxlength={fieldLimits.warehouses}
+          />
+        </div>
+      </div>
+
+      <div class="field" data-for={kindsFor("account")}>
+        <label for="enq-account">Account or company name<span class="nojs-only"> (existing customers)</span></label>
+        <input
+          id="enq-account"
+          class="input"
+          type="text"
+          name="account"
+          autocomplete="organization"
+          placeholder="The business on your Centra One account"
+          maxlength={fieldLimits.account}
+        />
+      </div>
+
+      <div class="field">
+        <label for="enq-message">
+          <span class="nojs-only">Message</span><span class="js-only" data-msg-label>{first.messageLabel}</span>
+        </label>
+        <textarea
+          id="enq-message"
+          class="textarea"
+          name="message"
+          rows="5"
+          placeholder="How can we help?"
+          maxlength={fieldLimits.message}></textarea>
+        {
+          enquiryRoutes
+            .filter((r) => r.hint)
+            .map((r) => (
+              <p class="enq-hint js-only" data-for={r.kind}>
+                {r.hint}
+              </p>
+            ))
+        }
+      </div>
+    </div>
+
+    <div class="hp" aria-hidden="true">
+      <label for="enq-website">Leave this field empty</label>
+      <input id="enq-website" type="text" name="website" tabindex="-1" autocomplete="off" />
+    </div>
+    <input type="hidden" name="started" value="" data-started />
+
+    <div class="enq-alert" role="alert" data-alert></div>
+
+    <div class="enq-send">
+      <button type="submit" class="btn btn-primary enq-submit" data-submit>
+        <span data-submit-label>Send enquiry</span>
+        <Icon name="arrow-right" size={18} />
+      </button>
+      {
+        enquiryRoutes
+          .filter((r) => r.expectation)
+          .map((r) => <p class="enq-exp js-only" data-for={r.kind} set:html={r.expectation} />)
+      }
+      <noscript>
+        <p class="enq-exp">
+          If you land back here after sending, it didn't go through. Please email{" "}<a
+            href={`mailto:${EMAIL.hello}`}>{EMAIL.hello}</a
+          >{" "}instead.
+        </p>
+      </noscript>
+    </div>
+  </div>
+
+  <div class="enq-status" role="status" data-status></div>
+  <div class="enq-again" data-again-row hidden>
+    <button type="button" class="btn btn-secondary btn-sm" data-again>Send another enquiry</button>
+    <a class="btn btn-ghost btn-sm" href="/help">Browse the help centre</a>
+  </div>
+
+  <template data-done-tpl>
+    <div class="enq-done">
+      <span class="enq-done-icon" aria-hidden="true"><Icon name="check" size={26} stroke={2.6} /></span>
+      <p class="enq-done-title" tabindex="-1" data-done-focus>Thanks, your enquiry is in.</p>
+      <p class="enq-done-text">A real person replies {REPLY_TIME}.</p>
+    </div>
+  </template>
+
+  <template data-error-tpl>
+    <div class="notice notice-err enq-notice">
+      <p class="enq-notice-text" id="enq-error" data-error-text></p>
+      <p class="enq-notice-mail" data-error-mail>
+        <Icon name="mail" size={16} />
+        <a href={`mailto:${EMAIL.hello}`} data-error-link>{EMAIL.hello}</a>
+      </p>
+    </div>
+  </template>
+</form>
+
+<style>
+  .enq {
+    position: relative;
+    padding: clamp(20px, 3.4vw, 36px);
+    border-radius: var(--radius-xl);
+    background: var(--glass);
+    border: 1px solid var(--line);
+    box-shadow: 0 60px 140px -70px rgba(26, 26, 255, 0.75);
+  }
+  .enq [hidden] {
+    display: none !important;
+  }
+
+  /* ---------- Header ---------- */
+  .enq-top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px 20px;
+  }
+  .enq-q {
+    font-size: clamp(22px, 2.2vw, 26px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    color: var(--text);
+  }
+  .enq-promise {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0;
+    padding: 7px 13px;
+    border-radius: 980px;
+    background: rgba(52, 211, 153, 0.08);
+    border: 1px solid rgba(52, 211, 153, 0.24);
+    color: #a7f3d0;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  /* ---------- Router ---------- */
+  .enq-router {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 22px;
+  }
+  .enq-route {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    min-height: 44px;
+    padding: 16px 16px 18px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.025);
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      border-color 0.25s ease,
+      background 0.25s ease,
+      box-shadow 0.35s ease;
+  }
+  .enq-route:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .enq-route[aria-pressed="true"] {
+    border-color: rgba(122, 140, 255, 0.85);
+    background: rgba(91, 108, 255, 0.14);
+    box-shadow:
+      0 0 0 1px rgba(122, 140, 255, 0.4),
+      0 24px 60px -30px rgba(26, 26, 255, 0.9);
+  }
+  .enq-route-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--accent-3);
+    transition:
+      background 0.25s ease,
+      color 0.25s ease;
+  }
+  .enq-route[aria-pressed="true"] .enq-route-icon {
+    background: var(--accent);
+    color: #fff;
+  }
+  .enq-route-title {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+  }
+  .enq-route-sub {
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--text-3);
+  }
+  .enq-route-check {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent-4);
+    color: var(--bg);
+    opacity: 0;
+    transform: scale(0.5);
+    transition:
+      opacity 0.25s ease,
+      transform 0.4s var(--ease-out);
+  }
+  .enq-route[aria-pressed="true"] .enq-route-check {
+    opacity: 1;
+    transform: none;
+  }
+
+  .enq-kind {
+    margin-top: 14px;
+  }
+
+  /* ---------- Fields ---------- */
+  .enq-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 26px;
+    padding-top: 26px;
+    border-top: 1px solid var(--line);
+  }
+  .enq-req {
+    color: var(--accent-3);
+  }
+  .enq-hint {
+    margin: 2px 0 0;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--text-3);
+  }
+  .enq-fields .textarea {
+    min-height: 132px;
+  }
+  /* "Select a range" reads as a placeholder, not an answer. */
+  .enq-fields .select:has(option[value=""]:checked) {
+    color: var(--text-3);
+  }
+
+  /* ---------- Send ---------- */
+  .enq-alert:not(:empty) {
+    margin-top: 22px;
+  }
+  .enq-notice p {
+    margin: 0;
+  }
+  .enq-notice-mail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px !important;
+  }
+  .enq-notice-mail a {
+    color: #fff;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, 0.4);
+    text-underline-offset: 3px;
+    overflow-wrap: anywhere;
+  }
+  .enq-send {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 20px;
+    margin-top: 26px;
+  }
+  .enq-submit[aria-disabled="true"] {
+    opacity: 0.72;
+    cursor: progress;
+  }
+  .enq-send noscript {
+    display: block;
+    flex: 1 1 240px;
+  }
+  .enq-exp :global(a) {
+    white-space: nowrap;
+  }
+  .enq-exp {
+    flex: 1 1 240px;
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--text-3);
+  }
+
+  /* ---------- Sent ---------- */
+  .enq[data-sent] .enq-top,
+  .enq[data-sent] .enq-body {
+    display: none;
+  }
+  .enq-done {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: clamp(8px, 2vw, 20px) 0 4px;
+  }
+  .enq-done-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: rgba(52, 211, 153, 0.12);
+    border: 1px solid rgba(52, 211, 153, 0.35);
+    color: var(--green);
+    animation: enq-pop 0.7s var(--ease-out) both;
+  }
+  .enq-done-title {
+    margin: 22px 0 0;
+    font-size: clamp(28px, 3.4vw, 40px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.045em;
+    color: var(--text);
+  }
+  .enq-done-title:focus {
+    outline: none;
+  }
+  .enq-done-text {
+    margin: 12px 0 0;
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--text-2);
+  }
+  .enq-again {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 26px;
+  }
+
+  /* ---------- No JavaScript vs JavaScript ---------- */
+  .enq-router,
+  .js-only {
+    display: none;
+  }
+  .enq[data-ready] .enq-router {
+    display: grid;
+  }
+  .enq[data-ready] .enq-kind,
+  .enq[data-ready] .nojs-only {
+    display: none;
+  }
+  .enq[data-ready] .js-only {
+    display: block;
+  }
+  .enq[data-ready] span.js-only {
+    display: inline;
+  }
+  .enq[data-ready] [data-for]:not(.is-on) {
+    display: none;
+  }
+  @media (scripting: enabled) {
+    .enq:not([data-ready]) .enq-router {
+      display: grid;
+    }
+    .enq:not([data-ready]) .enq-kind,
+    .enq:not([data-ready]) .nojs-only {
+      display: none;
+    }
+    .enq:not([data-ready]) .js-only {
+      display: block;
+    }
+    .enq:not([data-ready]) span.js-only {
+      display: inline;
+    }
+    .enq:not([data-ready]) [data-for]:not([data-for~="demo"]) {
+      display: none;
+    }
+  }
+
+  /* Fields that appear when the enquiry type changes. */
+  .is-entering {
+    animation: enq-in 0.5s var(--ease-out) both;
+  }
+  @keyframes enq-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes enq-pop {
+    from {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .enq-router {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .enq-route {
+      padding: 14px 14px 16px;
+    }
+    .enq-route-icon {
+      width: 30px;
+      height: 30px;
+      margin-bottom: 10px;
+    }
+    .enq-route-title {
+      font-size: 15px;
+    }
+    .enq-route-sub {
+      font-size: 13px;
+    }
+    .enq-route-check {
+      top: 12px;
+      right: 12px;
+    }
+  }
+  @media (max-width: 340px) {
+    .enq-router {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 520px) {
+    .enq-submit {
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+  type Route = { kind: string; title: string; label: string; placeholder: string };
+  type Answer = { ok?: boolean; error?: string; field?: string };
+  type Control = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+
+  // The Worker quietly drops posts made within 2.5 s of the page loading (a bot check), so a
+  // very quick human gets held back a moment instead of being dropped.
+  const MIN_FILL_MS = 2600;
+  const TIMEOUT_MS = 20000;
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const NETWORK_ERROR = "We couldn't send your enquiry. Check your connection and try again, or email us directly.";
+  const UNKNOWN_ERROR = "We couldn't send that. Please check the form and try again, or email us directly.";
+
+  const form = document.querySelector<HTMLFormElement>("form[data-enq]");
+  if (form) enhance(form);
+
+  function enhance(form: HTMLFormElement) {
+    const q = <T extends Element>(sel: string) => form.querySelector<T>(sel);
+    const routes: Route[] = JSON.parse(form.dataset.routes || "[]");
+    const knownErrors: string[] = JSON.parse(form.dataset.errors || "[]");
+    const email = form.dataset.email || "hello@centra-one.ai";
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const select = q<HTMLSelectElement>('select[name="kind"]');
+    const router = q<HTMLElement>("[data-router]");
+    const message = q<HTMLTextAreaElement>('textarea[name="message"]');
+    const msgLabel = q<HTMLElement>("[data-msg-label]");
+    const started = q<HTMLInputElement>("[data-started]");
+    const alertBox = q<HTMLElement>("[data-alert]");
+    const status = q<HTMLElement>("[data-status]");
+    const againRow = q<HTMLElement>("[data-again-row]");
+    const again = q<HTMLButtonElement>("[data-again]");
+    const submit = q<HTMLButtonElement>("[data-submit]");
+    const submitLabel = q<HTMLElement>("[data-submit-label]");
+    const doneTpl = q<HTMLTemplateElement>("template[data-done-tpl]");
+    const errorTpl = q<HTMLTemplateElement>("template[data-error-tpl]");
+    if (
+      !routes.length ||
+      !select ||
+      !router ||
+      !message ||
+      !started ||
+      !alertBox ||
+      !status ||
+      !againRow ||
+      !again ||
+      !submit ||
+      !submitLabel ||
+      !doneTpl ||
+      !errorTpl
+    )
+      return;
+
+    const buttons = Array.from(router.querySelectorAll<HTMLButtonElement>("[data-route]"));
+    const parts = Array.from(form.querySelectorAll<HTMLElement>("[data-for]"));
+    const isKind = (k: string | null): k is string => k !== null && routes.some((r) => r.kind === k);
+    let kind = "";
+    let sending = false;
+
+    const control = (name: string): Control | null => {
+      const el = form.elements.namedItem(name);
+      return el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement
+        ? el
+        : null;
+    };
+    const value = (name: string) => (control(name)?.value || "").trim();
+
+    // ---------- Enquiry type ----------
+    const setRoute = (next: string, opts: { animate?: boolean; url?: boolean } = {}) => {
+      const route = routes.find((r) => r.kind === next) || routes[0];
+      if (route.kind !== kind) clearError();
+      kind = route.kind;
+      form.dataset.kind = kind;
+      select.value = kind;
+      for (const b of buttons) b.setAttribute("aria-pressed", String(b.dataset.route === kind));
+      for (const part of parts) {
+        const on = (part.dataset.for || "").split(" ").includes(kind);
+        const wasOn = part.classList.contains("is-on");
+        part.classList.toggle("is-on", on);
+        // Fields for other enquiry types keep what was typed but aren't sent.
+        part.querySelectorAll<Control>("input, select, textarea").forEach((el) => (el.disabled = !on));
+        if (on && !wasOn && opts.animate && !reduce) {
+          part.classList.remove("is-entering");
+          void part.offsetWidth;
+          part.classList.add("is-entering");
+        }
+      }
+      if (msgLabel) msgLabel.textContent = route.label;
+      message.placeholder = route.placeholder;
+      if (opts.url) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("kind", kind);
+        url.searchParams.delete("error");
+        history.replaceState(history.state, "", url);
+      }
+    };
+
+    for (const b of buttons) {
+      b.addEventListener("click", () => {
+        if (b.getAttribute("aria-pressed") !== "true") setRoute(b.dataset.route || "", { animate: true, url: true });
+      });
+    }
+    router.addEventListener("keydown", (e) => {
+      const i = buttons.indexOf(document.activeElement as HTMLButtonElement);
+      if (i < 0) return;
+      const n = buttons.length;
+      let j: number;
+      switch (e.key) {
+        case "ArrowRight":
+        case "ArrowDown":
+          j = (i + 1) % n;
+          break;
+        case "ArrowLeft":
+        case "ArrowUp":
+          j = (i - 1 + n) % n;
+          break;
+        case "Home":
+          j = 0;
+          break;
+        case "End":
+          j = n - 1;
+          break;
+        default:
+          return;
+      }
+      e.preventDefault();
+      buttons[j].focus();
+      setRoute(buttons[j].dataset.route || "", { animate: true, url: true });
+    });
+
+    // ---------- Errors ----------
+    function clearError() {
+      alertBox?.replaceChildren();
+      form.querySelectorAll("[aria-invalid]").forEach((el) => {
+        el.removeAttribute("aria-invalid");
+        el.removeAttribute("aria-describedby");
+      });
+    }
+
+    // A mailto link that carries what they've typed, so nothing is lost if sending fails.
+    function mailHref() {
+      const route = routes.find((r) => r.kind === kind);
+      const subject = `Centra One enquiry: ${route ? route.title : "Website"}`;
+      const sign = [value("name"), value("company") || value("account")].filter(Boolean).join(", ");
+      const body = [value("message"), sign].filter(Boolean).join("\n\n").slice(0, 1500);
+      return `mailto:${email}?subject=${encodeURIComponent(subject)}${body ? `&body=${encodeURIComponent(body)}` : ""}`;
+    }
+
+    function showError(text: string, field?: string, offerEmail = false) {
+      clearError();
+      const frag = errorTpl!.content.cloneNode(true) as DocumentFragment;
+      const textEl = frag.querySelector<HTMLElement>("[data-error-text]");
+      const mailRow = frag.querySelector<HTMLElement>("[data-error-mail]");
+      const link = frag.querySelector<HTMLAnchorElement>("[data-error-link]");
+      if (textEl) textEl.textContent = text;
+      if (mailRow) mailRow.hidden = !offerEmail;
+      if (link) link.href = mailHref();
+      alertBox!.replaceChildren(frag);
+
+      const el = field ? control(field) : null;
+      if (el && !el.disabled && el.offsetParent !== null) {
+        el.setAttribute("aria-invalid", "true");
+        el.setAttribute("aria-describedby", "enq-error");
+        el.focus();
+      }
+    }
+
+    form.addEventListener("input", (e) => {
+      const t = e.target as HTMLElement;
+      if (t.getAttribute("aria-invalid") === "true") {
+        t.removeAttribute("aria-invalid");
+        t.removeAttribute("aria-describedby");
+      }
+    });
+
+    // Same checks as the Worker, so most mistakes are caught without a round trip.
+    function check(): { field: string; error: string } | null {
+      if (!value("name")) return { field: "name", error: "Please tell us your name." };
+      if (!value("email")) return { field: "email", error: "Please add a work email." };
+      if (!EMAIL_RE.test(value("email"))) return { field: "email", error: "That email doesn't look right." };
+      return null;
+    }
+
+    // ---------- Sending ----------
+    const setBusy = (on: boolean) => {
+      if (on) form.setAttribute("aria-busy", "true");
+      else form.removeAttribute("aria-busy");
+      submit.setAttribute("aria-disabled", String(on));
+      submitLabel.textContent = on ? "Sending…" : "Send enquiry";
+    };
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    function showSent() {
+      form.dataset.sent = "";
+      status!.replaceChildren(doneTpl!.content.cloneNode(true));
+      againRow!.hidden = false;
+      status!.querySelector<HTMLElement>("[data-done-focus]")?.focus();
+    }
+
+    function resetForm() {
+      form.reset();
+      delete form.dataset.sent;
+      status!.replaceChildren();
+      againRow!.hidden = true;
+      clearError();
+      started!.value = String(Date.now());
+      setRoute(kind);
+    }
+
+    again.addEventListener("click", () => {
+      resetForm();
+      control("name")?.focus();
+    });
+
+    form.noValidate = true;
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (sending) return;
+      clearError();
+      const problem = check();
+      if (problem) {
+        showError(problem.error, problem.field);
+        return;
+      }
+
+      sending = true;
+      setBusy(true);
+      try {
+        const body = new FormData(form);
+        const wait = Number(started.value) + MIN_FILL_MS - Date.now();
+        if (wait > 0) await sleep(wait);
+
+        const ctrl = new AbortController();
+        const timer = window.setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+        let res: Response;
+        try {
+          res = await fetch(form.action, {
+            method: "POST",
+            headers: { Accept: "application/json" },
+            body,
+            signal: ctrl.signal,
+          });
+        } finally {
+          window.clearTimeout(timer);
+        }
+        const answer = (await res.json().catch(() => null)) as Answer | null;
+        if (res.ok && answer && answer.ok) showSent();
+        else if (answer && answer.ok === false && answer.error) showError(answer.error, answer.field, !answer.field);
+        else showError(NETWORK_ERROR, undefined, true);
+      } catch {
+        showError(NETWORK_ERROR, undefined, true);
+      } finally {
+        sending = false;
+        setBusy(false);
+      }
+    });
+
+    // ---------- Start ----------
+    started.value = String(Date.now());
+    const params = new URLSearchParams(window.location.search);
+    const wanted = params.get("kind");
+    setRoute(isKind(wanted) ? wanted : routes[0].kind);
+    form.dataset.ready = "";
+
+    // After a no-JavaScript post the Worker sends people back with ?error=. Only its own
+    // messages are shown word for word.
+    const err = params.get("error");
+    if (err !== null) {
+      showError(knownErrors.includes(err) ? err : UNKNOWN_ERROR, undefined, true);
+      const url = new URL(window.location.href);
+      url.searchParams.delete("error");
+      history.replaceState(history.state, "", url);
+      requestAnimationFrame(() => alertBox.scrollIntoView({ block: "center", behavior: "auto" }));
+    }
+
+    // Links on this page to /contact?kind=...#form switch the type in place instead of reloading.
+    const bare = (p: string) => p.replace(/(\.html)?\/?$/, "");
+    document.addEventListener("click", (e) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = (e.target as Element | null)?.closest<HTMLAnchorElement>("a[href]");
+      if (!a) return;
+      const url = new URL(a.href, window.location.href);
+      if (url.origin !== window.location.origin || bare(url.pathname) !== bare(window.location.pathname)) return;
+      const k = url.searchParams.get("kind");
+      if (!isKind(k)) return;
+      e.preventDefault();
+      if (form.dataset.sent !== undefined) resetForm();
+      setRoute(k, { animate: true, url: true });
+      form.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+      buttons.find((b) => b.dataset.route === k)?.focus({ preventScroll: true });
+    });
+  }
+</script>

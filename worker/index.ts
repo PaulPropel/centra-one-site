@@ -110,9 +110,15 @@ async function handleEnquiry(request: Request, env: Env): Promise<Response> {
   const wantsJson = (request.headers.get("accept") || "").includes("application/json");
   const redirect = (location: string) =>
     new Response(null, { status: 303, headers: { location, "cache-control": "no-store" } });
+  let kind = "";
   const sent = () => (wantsJson ? json({ ok: true }) : redirect("/contact/sent"));
-  const fail = (status: number, error: string, field?: string) =>
-    wantsJson ? json({ ok: false, error, field }, status) : redirect(`/contact?error=${encodeURIComponent(error)}#form`);
+  const fail = (status: number, error: string, field?: string) => {
+    if (wantsJson) return json({ ok: false, error, field }, status);
+    const params = new URLSearchParams();
+    if (kind) params.set("kind", kind);
+    params.set("error", error);
+    return redirect(`/contact?${params.toString()}#form`);
+  };
 
   if (!originAllowed(request)) return fail(403, "Please send this from the Centra One website.");
   const length = Number(request.headers.get("content-length") || "0");
@@ -124,6 +130,7 @@ async function handleEnquiry(request: Request, env: Env): Promise<Response> {
   } catch {
     return fail(400, "Please check the form and try again.");
   }
+  if (KINDS[f.kind]) kind = f.kind;
 
   // Spam traps: a hidden field people never fill in, and forms submitted impossibly fast.
   // Both get a normal-looking success so bots learn nothing.
