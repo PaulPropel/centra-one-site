@@ -1,0 +1,108 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero3D from "../components/home/Hero3D.astro";
+import PlatformBento from "../components/home/PlatformBento.astro";
+import Numbers from "../components/home/Numbers.astro";
+import ChatDemo from "../components/ChatDemo.astro";
+import PricingPlans from "../components/PricingPlans.astro";
+import FaqList from "../components/FaqList.astro";
+import CtaClosing from "../components/CtaClosing.astro";
+import { homeFaq } from "../data/faq";
+import { plans, AI_ACTIONS_FOOTNOTE, PRICING_FOOTNOTE } from "../data/pricing";
+import { SITE_URL, COMPANY, EMAIL } from "../data/site";
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: COMPANY.name,
+    legalName: COMPANY.legalName,
+    url: SITE_URL,
+    logo: `${SITE_URL}/icon-512.png`,
+    email: EMAIL.hello,
+    address: { "@type": "PostalAddress", addressCountry: "NZ" },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: COMPANY.name,
+    url: SITE_URL,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: COMPANY.name,
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    url: SITE_URL,
+    description:
+      "Inventory, quoting, orders, purchasing and a B2B customer portal for wholesalers, distributors and small manufacturers, with an AI assistant built in.",
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "USD",
+      lowPrice: Math.min(...plans.map((p) => p.price)),
+      highPrice: Math.max(...plans.map((p) => p.price)),
+      offerCount: plans.length,
+    },
+  },
+];
+---
+
+<BaseLayout
+  title="Centra One: the AI-powered wholesale platform"
+  fullTitle
+  description="Stock, quotes, orders and purchasing for wholesalers, distributors and small manufacturers, with an AI that watches all of it. 30 days free. From US$59 a month."
+  footnotes={[AI_ACTIONS_FOOTNOTE]}
+  notes={[PRICING_FOOTNOTE]}
+  jsonLd={jsonLd}
+>
+  <Hero3D />
+
+  <section id="ask" class="section">
+    <div class="container">
+      <ChatDemo footnote={1}>
+        <p class="eyebrow rv">Ask Centra AI</p>
+        <h2 class="h1 rv mt-24">Just ask.</h2>
+        <p class="lead rv2 mt-24">
+          Stock, sales, customers, suppliers. Ask in plain English and get answers from your live data, not a report
+          someone ran last month.
+        </p>
+      </ChatDemo>
+    </div>
+  </section>
+
+  <PlatformBento />
+
+  <Numbers />
+
+  <section id="pricing" class="section">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="container relative">
+      <div class="center">
+        <p class="eyebrow rv">Pricing</p>
+        <h2 class="h1 rv mt-24">Simple pricing.<br /><span class="dim">Based on your size.</span></h2>
+        <p class="lead rv2 mt-24">
+          Every plan runs the full platform. Bigger plans add more users, Centra AI actions and more hands-on help.
+        </p>
+      </div>
+      <div class="mt-48">
+        <PricingPlans />
+      </div>
+      <p class="center mt-32 rv">
+        <a href="/pricing">Compare plans in detail <span aria-hidden="true">→</span></a>
+      </p>
+    </div>
+  </section>
+
+  <section id="faq" class="section-tight">
+    <div class="container container-narrow">
+      <h2 class="h1 center rv">Questions.<br /><span class="dim">Answered.</span></h2>
+      <FaqList items={homeFaq} openFirst class="mt-48" />
+      <p class="center mt-32 subtle rv">
+        Something else? Browse the <a href="/help">help centre</a> or <a href="/contact">talk to us</a>.
+      </p>
+    </div>
+  </section>
+
+  <CtaClosing id="start" />
+</BaseLayout>

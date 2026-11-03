@@ -1,0 +1,161 @@
+---
+// "Everything wholesale runs on." The product in seven tiles.
+---
+
+<section id="platform" class="section bento-section">
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="container relative">
+    <p class="eyebrow rv">The platform</p>
+    <h2 class="h1 rv mt-24">Everything wholesale runs on.<br /><span class="dim">Nothing it doesn't.</span></h2>
+
+    <div class="bento mt-64">
+      <article class="glass pad-lg span-all bento-hero rv">
+        <div class="bento-hero-copy">
+          <p class="eyebrow">Inventory</p>
+          <h3 class="bento-hero-title">Every bin. Every batch. Every warehouse.</h3>
+          <p class="body mt-16">
+            Live stock everywhere you keep it, with batch, expiry and serial tracking. The oldest stock always goes out
+            first.
+          </p>
+          <a class="bento-link" href="/features#inventory">Inventory features <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="table-wrap bento-table mono" role="img" aria-label="Example stock by warehouse: Auckland 1,120 bins and 48,210 units, Wellington 640 bins and 22,905 units, Christchurch 640 bins and 19,488 units.">
+          <div class="bento-row bento-row-head"><span>WAREHOUSE</span><span>BINS</span><span>UNITS</span></div>
+          <div class="bento-row"><span>Auckland</span><span>1,120</span><span>48,210</span></div>
+          <div class="bento-row"><span>Wellington</span><span>640</span><span>22,905</span></div>
+          <div class="bento-row"><span>Christchurch</span><span>640</span><span>19,488</span></div>
+          <div class="bento-note">BATCH BG-2026-04 EXPIRES FIRST → PICKED FIRST</div>
+        </div>
+      </article>
+
+      <article class="tile rv">
+        <p class="eyebrow">Quoting</p>
+        <h3 class="tile-title">Quotes customers accept online.</h3>
+        <p class="data data-good mt-auto"><span>QT-2026-0041</span><span>ACCEPTED ✓</span></p>
+      </article>
+
+      <article class="tile rv2">
+        <p class="eyebrow">B2B portal</p>
+        <h3 class="tile-title">Your customers can order at 2am. Without calling you.</h3>
+        <p class="data mt-auto"><span>PORTAL ORDER</span><span>02:14 AM</span></p>
+      </article>
+
+      <article class="tile rv3">
+        <p class="eyebrow">Purchasing</p>
+        <h3 class="tile-title">Reorder suggestions from what actually sells.</h3>
+        <p class="data mt-auto"><span>SUGGESTED</span><span>65 UNITS</span></p>
+      </article>
+
+      <article class="tile tile-xero rv">
+        <p class="eyebrow eyebrow-xero">Xero</p>
+        <h3 class="tile-title">Invoices land in Xero. Automatically.</h3>
+        <p class="data mt-auto"><span>INV-2026-0212 → XERO</span><span class="ok">SENT ✓</span></p>
+      </article>
+
+      <article class="tile tile-shopify rv2">
+        <p class="eyebrow eyebrow-shopify">Shopify</p>
+        <h3 class="tile-title">Stock synced every 15 minutes. Web orders flow straight in.</h3>
+        <p class="data mt-auto"><span>STOCK SYNC</span><span>EVERY 15 MIN</span></p>
+      </article>
+
+      <article class="tile rv3">
+        <p class="eyebrow">Fulfilment</p>
+        <h3 class="tile-title">Pick, pack and ship from a phone.</h3>
+        <p class="data mt-auto"><span>SCAN → PACK → SHIP</span><span>ARAMEX · BASCIK</span></p>
+      </article>
+    </div>
+
+    <p class="bento-more rv">
+      <a class="btn btn-secondary" href="/features">See every feature</a>
+      <a class="btn btn-ghost" href="/integrations">Integrations <span aria-hidden="true">→</span></a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .bento-section {
+    padding-top: clamp(110px, 12vw, 140px);
+  }
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: 16px;
+  }
+  .bento-hero {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    align-items: center;
+  }
+  .bento-hero-copy {
+    flex: 1 1 320px;
+    min-width: 0;
+  }
+  .bento-hero-title {
+    margin: 12px 0 0;
+    font-size: clamp(32px, 3.8vw, 52px);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-weight: 700;
+  }
+  .bento-hero .body {
+    max-width: 440px;
+  }
+  .bento-link {
+    display: inline-flex;
+    gap: 6px;
+    margin-top: 18px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .bento-table {
+    flex: 1 1 380px;
+    min-width: 0;
+    font-size: 13px;
+    overflow: hidden;
+  }
+  .bento-row {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .bento-row span:not(:first-child) {
+    text-align: right;
+  }
+  .bento-row-head {
+    border-top: 0;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-4);
+    font-size: 11px;
+  }
+  .bento-note {
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--accent-4);
+    background: rgba(91, 108, 255, 0.1);
+  }
+  .tile .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+  .eyebrow-xero {
+    color: #6fd3f5;
+  }
+  .eyebrow-shopify {
+    color: #b9db7c;
+  }
+  .mt-auto {
+    margin-top: auto;
+  }
+  .ok {
+    color: var(--green);
+  }
+  .bento-more {
+    margin: 40px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+</style>

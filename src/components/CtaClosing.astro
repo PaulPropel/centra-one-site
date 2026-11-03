@@ -1,0 +1,80 @@
+---
+// Closing call to action used at the bottom of most pages.
+// `title` may contain simple trusted HTML (e.g. 'Your business.<br><span class="shine">Handled.</span>').
+import { SIGNUP_URL } from "../data/site";
+
+interface Link {
+  label: string;
+  href: string;
+}
+interface Props {
+  title?: string;
+  lead?: string;
+  primary?: Link;
+  /** Pass null to hide the second button. */
+  secondary?: Link | null;
+  fine?: string;
+  /** Show the glowing Centra One mark above the headline. */
+  logo?: boolean;
+  id?: string;
+}
+
+const {
+  title = 'Your business.<br><span class="shine">Handled.</span>',
+  lead = "Try every part of it free for 30 days. No credit card. Cancel any time.",
+  primary = { label: "Start free trial", href: SIGNUP_URL },
+  secondary = { label: "Book a demo", href: "/contact?kind=demo#form" },
+  fine,
+  logo = true,
+  id,
+} = Astro.props;
+---
+
+<section class="cta-closing section center" id={id}>
+  <div class="cta-glow" aria-hidden="true"></div>
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="container relative">
+    {logo && <img class="cta-mark breathe rv" src="/images/centra-one-logo.png" alt="" width="112" height="112" loading="lazy" decoding="async" />}
+    <h2 class:list={["display rv", { "mt-48": logo }]} set:html={title} />
+    {lead && <p class="lead rv2 mt-24">{lead}</p>}
+    <div class="btn-row rv2 mt-32">
+      <a class="btn btn-primary" href={primary.href}>{primary.label}</a>
+      {secondary && <a class="btn btn-secondary" href={secondary.href}>{secondary.label}</a>}
+    </div>
+    {fine && <p class="fine rv3 mt-24">{fine}</p>}
+  </div>
+</section>
+
+<style>
+  .cta-closing {
+    overflow: hidden;
+    padding-block: clamp(120px, 14vw, 180px);
+  }
+  .cta-glow {
+    position: absolute;
+    left: 50%;
+    top: 40px;
+    width: 760px;
+    height: 760px;
+    margin-left: -380px;
+    pointer-events: none;
+    background: radial-gradient(closest-side, rgba(26, 26, 255, 0.38), rgba(26, 26, 255, 0));
+    filter: blur(10px);
+  }
+  .cta-mark {
+    display: block;
+    width: 112px;
+    height: 112px;
+    margin: 0 auto;
+    border-radius: 26px;
+  }
+  .cta-closing h2 {
+    max-width: 940px;
+    margin-inline: auto;
+    font-size: clamp(54px, 8vw, 124px);
+    line-height: 0.94;
+  }
+  .cta-closing .lead {
+    max-width: 540px;
+  }
+</style>

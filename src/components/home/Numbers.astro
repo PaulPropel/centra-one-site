@@ -1,0 +1,70 @@
+---
+// "Live in a day." Four big numbers.
+const stats = [
+  { value: "30", label: "Days free, no credit card" },
+  { value: "1", label: "Day to get up and running" },
+  { value: "15", label: "Minutes between Shopify syncs" },
+  { value: "$59", label: "US a month to start", accent: true },
+];
+const reveal = ["rv", "rv2", "rv3", "rv3"];
+---
+
+<section class="section numbers">
+  <div class="container">
+    <div class="numbers-inner center">
+      <h2 class="h1 rv">Live in a day.<br /><span class="dim">Not a quarter.</span></h2>
+      <p class="lead rv2 mt-24">No consultants and no six-month project. Bring your product list and we'll help you import it.</p>
+      <div class="grid-auto-sm numbers-grid">
+        {
+          stats.map((s, i) => (
+            <div class:list={["number", reveal[i], { "number-accent": s.accent }]}>
+              <p class="number-value">{s.value}</p>
+              <p class="fine number-label">{s.label}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .numbers {
+    padding-top: clamp(40px, 6vw, 80px);
+  }
+  .numbers-inner {
+    border-top: 1px solid var(--line);
+    padding-top: clamp(64px, 9vw, 100px);
+  }
+  .numbers .lead {
+    max-width: 560px;
+  }
+  .numbers-grid {
+    margin-top: clamp(48px, 7vw, 80px);
+    text-align: left;
+  }
+  .number {
+    padding: 28px;
+    border-radius: 24px;
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .number-accent {
+    border-color: rgba(91, 108, 255, 0.35);
+    background: rgba(91, 108, 255, 0.08);
+  }
+  .number-value {
+    margin: 0;
+    font-size: 64px;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-weight: 700;
+  }
+  .number-label {
+    margin-top: 14px;
+    line-height: 1.5;
+  }
+  .number-accent .number-label {
+    color: var(--accent-4);
+  }
+</style>

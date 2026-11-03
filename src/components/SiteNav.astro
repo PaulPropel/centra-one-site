@@ -1,0 +1,187 @@
+---
+// Floating glass navigation. It sits in a zero-height sticky header so it overlays the top
+// of every page (the homepage 3D stage runs underneath it); pages pad their first section
+// with .page-top to clear it.
+const path = Astro.url.pathname.replace(/\.html$/, "").replace(/\/$/, "") || "/";
+const links = [
+  { href: "/features", label: "Features" },
+  { href: "/ai", label: "Centra AI" },
+  { href: "/integrations", label: "Integrations" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/help", label: "Help" },
+];
+const more = [
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+  { href: "/changelog", label: "Changelog" },
+];
+const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
+---
+
+<header class="nav">
+  <div class="nav-bar">
+    <a class="nav-brand" href="/" aria-label="Centra One home">
+      <img src="/images/centra-one-logo.png" width="26" height="26" alt="" />
+      <span>Centra One</span>
+    </a>
+    <nav class="nav-links lg-only" aria-label="Main">
+      {links.map((l) => <a href={l.href} aria-current={isActive(l.href) ? "page" : undefined}>{l.label}</a>)}
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-ghost btn-sm lg-only" href="https://portal.centra-one.ai/login">Sign in</a>
+      <a class="btn btn-primary btn-sm nav-cta" href="https://portal.centra-one.ai/signup">Start free trial</a>
+      <button class="nav-toggle sm-only" type="button" aria-expanded="false" aria-controls="nav-menu" aria-label="Open menu">
+        <svg class="icon-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16"></path><path d="M4 12h16"></path><path d="M4 17h16"></path></svg>
+        <svg class="icon-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6 6 18"></path></svg>
+      </button>
+    </div>
+  </div>
+  <div id="nav-menu" class="nav-menu" hidden>
+    <nav aria-label="Mobile">
+      {[...links, ...more].map((l) => <a href={l.href} aria-current={isActive(l.href) ? "page" : undefined}>{l.label}</a>)}
+      <a href="https://portal.centra-one.ai/login">Sign in</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 14px;
+    z-index: 60;
+    height: 0;
+    padding: 0 16px;
+  }
+  .nav-bar {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 20px;
+    padding: 8px 8px 8px 16px;
+    border-radius: 22px;
+    background: rgba(14, 16, 28, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    backdrop-filter: blur(18px) saturate(160%);
+  }
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .nav-brand:hover {
+    color: var(--text);
+  }
+  .nav-brand img {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    display: block;
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .nav-links a {
+    color: var(--soft);
+  }
+  .nav-links a:hover,
+  .nav-links a[aria-current="page"] {
+    color: var(--text);
+  }
+  .nav-links a[aria-current="page"] {
+    text-decoration: underline;
+    text-decoration-color: var(--accent-3);
+    text-underline-offset: 8px;
+    text-decoration-thickness: 2px;
+  }
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid var(--line-2);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .nav-toggle .icon-close,
+  .nav-toggle[aria-expanded="true"] .icon-open {
+    display: none;
+  }
+  .nav-toggle[aria-expanded="true"] .icon-close {
+    display: block;
+  }
+  .nav-menu {
+    max-width: 1120px;
+    margin: 8px auto 0;
+    padding: 10px;
+    border-radius: 22px;
+    background: rgba(14, 16, 28, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+  }
+  .nav-menu nav {
+    display: flex;
+    flex-direction: column;
+  }
+  .nav-menu a {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 0 14px;
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 17px;
+    font-weight: 500;
+  }
+  .nav-menu a:hover,
+  .nav-menu a[aria-current="page"] {
+    background: rgba(255, 255, 255, 0.06);
+  }
+  @media (max-width: 420px) {
+    .nav-cta {
+      padding: 0 12px;
+      font-size: 13px;
+    }
+  }
+</style>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>(".nav-toggle");
+  const menu = document.getElementById("nav-menu");
+  if (toggle && menu) {
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute("aria-expanded", String(open));
+      toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+      menu.hidden = !open;
+    };
+    toggle.addEventListener("click", () => setOpen(menu.hidden));
+    menu.addEventListener("click", (e) => {
+      if ((e.target as HTMLElement).closest("a")) setOpen(false);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !menu.hidden) {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+  }
+</script>

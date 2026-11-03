@@ -1,0 +1,404 @@
+---
+// Plan cards with the revenue finder. Used on the homepage and /pricing.
+// Without JavaScript the finder stays hidden and Growth shows as "Most popular".
+import { plans, finderNotes, EXTRA_USER_PRICE, TRIAL_DAYS } from "../data/pricing";
+import { SIGNUP_URL } from "../data/site";
+
+interface Props {
+  /** Use each plan's longer `details` list (for /pricing). */
+  detailed?: boolean;
+  /** Show the revenue finder above the cards. */
+  finder?: boolean;
+}
+const { detailed = false, finder = true } = Astro.props;
+
+const bands = [
+  { label: "Under $1M", plan: "starter" },
+  { label: "$1M to $2.5M", plan: "growth" },
+  { label: "$2.5M to $5M", plan: "scale" },
+  { label: "Over $5M", plan: "custom" },
+];
+const startIndex = 1;
+const finderData = JSON.stringify(bands.map((b) => ({ ...b, note: finderNotes[b.plan] })));
+---
+
+<div class="plans" data-plans>
+  {
+    finder && (
+      <div class="finder glass-solid rv2" data-finder hidden>
+        <div class="finder-top">
+          <label class="label" for="plan-finder">Your annual wholesale revenue</label>
+          <output class="finder-value" for="plan-finder" data-finder-value>
+            {bands[startIndex].label}
+          </output>
+        </div>
+        <input
+          id="plan-finder"
+          class="finder-range"
+          type="range"
+          min="0"
+          max={bands.length - 1}
+          step="1"
+          value={startIndex}
+          style={`--fill: ${((startIndex / (bands.length - 1)) * 100).toFixed(2)}%`}
+          aria-valuetext={bands[startIndex].label}
+          data-finder-range
+          data-bands={finderData}
+        />
+        <div class="finder-scale mono" aria-hidden="true">
+          <span>UNDER $1M</span>
+          <span>$1M</span>
+          <span>$2.5M</span>
+          <span>$5M+</span>
+        </div>
+        <p class="finder-note" data-finder-note>{finderNotes[bands[startIndex].plan]}</p>
+      </div>
+    )
+  }
+
+  <div class="plan-grid">
+    {
+      plans.map((plan) => (
+        <article class:list={["plan", { "is-popular": plan.popular }]} data-plan={plan.id} aria-labelledby={`plan-${plan.id}`}>
+          <div class="plan-head">
+            <h3 class="plan-name" id={`plan-${plan.id}`}>{plan.name}</h3>
+            <span class="plan-badge plan-badge-match mono">YOUR PLAN</span>
+            {plan.popular && <span class="plan-badge plan-badge-popular mono">MOST POPULAR</span>}
+          </div>
+          <p class="plan-band mono">
+            {plan.band.replace(/ revenue$/, "").toUpperCase()} · {plan.users} USERS
+          </p>
+          <p class="plan-price">
+            <span class="plan-amount">${plan.price}</span>
+            <span class="plan-unit">US / month</span>
+          </p>
+          {detailed && <p class="plan-blurb">{plan.blurb}</p>}
+          <ul class="plan-list">
+            {plan.intro && <li class="plan-intro">{plan.intro}</li>}
+            {(detailed ? (plan.details ?? plan.features) : plan.features).map((f) => (
+              <li set:html={f} />
+            ))}
+          </ul>
+          <a class="btn plan-cta" href={SIGNUP_URL}>
+            Start free trial
+          </a>
+        </article>
+      ))
+    }
+  </div>
+
+  <div class="plan-custom" data-plan="custom">
+    <div class="plan-custom-copy">
+      <div class="plan-head">
+        <h3 class="plan-custom-title">Over $5M in revenue?</h3>
+        <span class="plan-badge plan-badge-match mono">YOUR PLAN</span>
+      </div>
+      <p>Custom pricing with unlimited users, dedicated support, custom integrations and SLA guarantees.</p>
+    </div>
+    <a class="btn btn-secondary btn-sm" href="/contact?kind=enterprise#form">Talk to us</a>
+  </div>
+
+  <p class="fine plans-fine">
+    {TRIAL_DAYS}-day free trial on every plan · No credit card · Extra users US${EXTRA_USER_PRICE}/mo each
+  </p>
+</div>
+
+<style>
+  .plans {
+    text-align: left;
+  }
+  .finder {
+    max-width: 720px;
+    margin: 0 auto 36px;
+    padding: 26px 30px;
+    border-radius: 24px;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .finder-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .finder-value {
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+  }
+  .finder-range {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 44px;
+    margin: 12px 0 4px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .finder-range::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--accent-2) var(--fill, 33.3%), rgba(255, 255, 255, 0.12) var(--fill, 33.3%));
+  }
+  .finder-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    margin-top: -9px;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 6px rgba(91, 108, 255, 0.35), 0 6px 18px rgba(0, 0, 0, 0.45);
+    transition: box-shadow 0.2s ease;
+  }
+  .finder-range::-moz-range-track {
+    height: 6px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .finder-range::-moz-range-progress {
+    height: 6px;
+    border-radius: 6px;
+    background: var(--accent-2);
+  }
+  .finder-range::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 6px rgba(91, 108, 255, 0.35), 0 6px 18px rgba(0, 0, 0, 0.45);
+  }
+  .finder-range:hover::-webkit-slider-thumb,
+  .finder-range:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 9px rgba(91, 108, 255, 0.45), 0 6px 18px rgba(0, 0, 0, 0.45);
+  }
+  .finder-range:hover::-moz-range-thumb,
+  .finder-range:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 9px rgba(91, 108, 255, 0.45), 0 6px 18px rgba(0, 0, 0, 0.45);
+  }
+  .finder-scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-4);
+  }
+  .finder-note {
+    margin: 16px 0 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--soft);
+  }
+
+  .plan-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: 16px;
+    align-items: stretch;
+  }
+  .plan {
+    display: flex;
+    flex-direction: column;
+    padding: 32px;
+    border-radius: 26px;
+    background: var(--glass);
+    border: 1px solid var(--line);
+    transition: transform 0.6s var(--ease-out), box-shadow 0.6s ease, border-color 0.6s ease;
+  }
+  .plan-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    min-height: 28px;
+  }
+  .plan-name,
+  .plan-custom-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .plan-badge {
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 980px;
+    background: rgba(91, 108, 255, 0.2);
+    color: #c7cfff;
+    white-space: nowrap;
+  }
+  .plan-badge-match {
+    display: none;
+  }
+  .plan-band {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: var(--text-3);
+  }
+  .plan-price {
+    margin: 26px 0 0;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .plan-amount {
+    font-size: 58px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: -0.05em;
+  }
+  .plan-unit {
+    font-size: 15px;
+    color: var(--text-3);
+  }
+  .plan-blurb {
+    margin: 18px 0 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-2);
+  }
+  .plan-list {
+    margin: 26px 0 30px;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--soft);
+  }
+  .plan-list li:not(.plan-intro) {
+    position: relative;
+    padding-left: 22px;
+  }
+  .plan-list li:not(.plan-intro)::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 0.42em;
+    width: 10px;
+    height: 6px;
+    border-left: 2px solid var(--accent-3);
+    border-bottom: 2px solid var(--accent-3);
+    transform: rotate(-45deg);
+  }
+  .plan-intro {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .plan-cta {
+    margin-top: auto;
+    min-height: 48px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: var(--text);
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+  .plan-cta:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text);
+  }
+
+  .plan-custom {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 22px 26px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--line);
+    transition: border-color 0.6s ease, box-shadow 0.6s ease;
+  }
+  .plan-custom-copy {
+    min-width: 0;
+    flex: 1 1 320px;
+  }
+  .plan-custom-copy p {
+    margin: 4px 0 0;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--text-3);
+  }
+  .plans-fine {
+    margin-top: 26px;
+    color: var(--text-4);
+    text-align: center;
+  }
+
+  /* Highlight: "Most popular" until the finder picks a plan, then the matching plan. */
+  .plans:not(.is-live) .plan.is-popular,
+  .plan.is-match,
+  .plan-custom.is-match {
+    border-color: rgba(122, 140, 255, 0.9);
+    box-shadow: 0 0 0 1px rgba(122, 140, 255, 0.5), 0 40px 90px -40px rgba(26, 26, 255, 0.8);
+  }
+  .plan.is-match {
+    transform: translateY(-8px);
+  }
+  .plans:not(.is-live) .plan.is-popular .plan-cta,
+  .plan.is-match .plan-cta {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .plan.is-match .plan-cta:hover {
+    background: var(--accent-hover);
+  }
+  .is-live .plan-badge-popular {
+    display: none;
+  }
+  .is-live .plan:not(.is-match).is-popular .plan-badge-popular {
+    display: inline-flex;
+  }
+  .is-match .plan-badge-match {
+    display: inline-flex;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .plan.is-match {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  type Band = { label: string; plan: string; note: string };
+
+  for (const root of document.querySelectorAll<HTMLElement>("[data-plans]")) {
+    const finder = root.querySelector<HTMLElement>("[data-finder]");
+    const range = root.querySelector<HTMLInputElement>("[data-finder-range]");
+    const value = root.querySelector<HTMLOutputElement>("[data-finder-value]");
+    const note = root.querySelector<HTMLElement>("[data-finder-note]");
+    if (!finder || !range || !value || !note) continue;
+
+    let bands: Band[] = [];
+    try {
+      bands = JSON.parse(range.dataset.bands || "[]");
+    } catch {
+      continue;
+    }
+    if (!bands.length) continue;
+
+    const cards = root.querySelectorAll<HTMLElement>("[data-plan]");
+    const apply = () => {
+      const index = Number(range.value);
+      const band = bands[index] ?? bands[0];
+      value.textContent = band.label;
+      note.textContent = band.note;
+      range.setAttribute("aria-valuetext", band.label);
+      range.style.setProperty("--fill", `${(index / Math.max(1, bands.length - 1)) * 100}%`);
+      cards.forEach((card) => card.classList.toggle("is-match", card.dataset.plan === band.plan));
+    };
+
+    finder.hidden = false;
+    root.classList.add("is-live");
+    range.addEventListener("input", apply);
+    range.addEventListener("change", apply);
+    apply();
+  }
+</script>

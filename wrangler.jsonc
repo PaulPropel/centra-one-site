@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // The centra-one.ai marketing site: static pages from Astro (dist/) served as Worker
+  // assets. Only /api/* runs the Worker code (website enquiries, sent through Resend).
+  "name": "centra-one-site",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "html_handling": "drop-trailing-slash",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*"]
+  },
+  "vars": {
+    "ENQUIRY_TO": "paul@centra-one.ai",
+    "ENQUIRY_FROM": "Centra One website <website@centra-one.ai>"
+  },
+  // RESEND_API_KEY is a Secret set on the Worker in Cloudflare, never in this file.
+  "observability": { "enabled": true },
+  "workers_dev": true,
+  "preview_urls": true
+}

@@ -1,0 +1,518 @@
+---
+// "Just ask" demo: example questions on the left (under whatever copy you pass in the
+// default slot) and a scripted Centra AI conversation on the right. Used on / and /ai.
+//
+// Without JavaScript the first conversation shows in full. With it, the chat plays when it
+// scrolls into view and replays whenever another question is picked.
+import { conversations, type DemoConvo } from "../data/ai-demo";
+
+interface Props {
+  /** Which conversations to offer, by id (see src/data/ai-demo.ts). */
+  ids?: string[];
+  /** Footnote number to attach to the approval line, if the page has one. */
+  footnote?: number;
+}
+const { ids = ["focus", "reorder", "quiet"], footnote } = Astro.props;
+const convos: DemoConvo[] = ids
+  .map((id) => conversations.find((c) => c.id === id))
+  .filter((c): c is DemoConvo => Boolean(c));
+
+// Staggered entrance timings (seconds) for each part of a reply.
+const plan = (c: DemoConvo) => {
+  const items = c.items?.length ?? 0;
+  const statsAt = 1.25;
+  const itemAt = (k: number) => 1.25 + k * 0.2;
+  const tailAt = 1.25 + (items || (c.stats ? 1 : 0)) * 0.2 + 0.1;
+  const actionAt = tailAt + 0.4;
+  return { statsAt, itemAt, tailAt, actionAt };
+};
+---
+
+<div class="split chat-demo" data-chat>
+  <div class="chat-copy">
+    <slot />
+    <div class="chat-chips rv3" role="group" aria-label="Example questions">
+      {
+        convos.map((c, i) => (
+          <button type="button" class="chat-chip" aria-pressed={i === 0 ? "true" : "false"} data-chat-pick={c.id}>
+            {c.question}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+
+  <div class="chat-side">
+    <div class="chat-panel rv" data-chat-panel>
+      <div class="chat-head">
+        <div class="chat-who">
+          <img src="/images/centra-one-logo.png" alt="" width="28" height="28" loading="lazy" decoding="async" />
+          <span class="chat-name">Centra AI</span>
+          <span class="chat-kind mono" data-chat-kind>{convos[0]?.kind.toUpperCase()}</span>
+        </div>
+        <span class="chat-live mono"><span class="dot" aria-hidden="true"></span>LIVE DATA</span>
+      </div>
+
+      <div class="chat-body" aria-live="polite">
+        {
+          convos.map((c, i) => {
+            const t = plan(c);
+            return (
+              <div class="chat-convo" data-chat-convo={c.id} data-kind={c.kind.toUpperCase()} hidden={i !== 0}>
+                <p class="sr-only">You asked:</p>
+                <div class="msg msg-me" style="--d: 0.05s">
+                  {c.question}
+                </div>
+                <div class="typing" aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                </div>
+                <p class="sr-only">Centra AI answered:</p>
+                <div class="msg msg-ai" style="--d: 1s">
+                  <p set:html={c.lead} />
+                  {c.stats && (
+                    <div class="msg-stats msg" style={`--d: ${t.statsAt}s`}>
+                      {c.stats.map((s) => (
+                        <div>
+                          <span class="mono">{s.label.toUpperCase()}</span>
+                          <strong>{s.value}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {c.items && (
+                    <ul>
+                      {c.items.map((item, k) => (
+                        <li class="msg" style={`--d: ${t.itemAt(k).toFixed(2)}s`}>
+                          <span class:list={["msg-dot", item.tone ?? "blue"]} aria-hidden="true" />
+                          <span set:html={item.html} />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {c.tail && <p class="msg msg-tail" style={`--d: ${t.tailAt.toFixed(2)}s`} set:html={c.tail} />}
+                </div>
+                {c.action && (
+                  <div class="msg msg-action" style={`--d: ${t.actionAt.toFixed(2)}s`}>
+                    <p class="msg-action-title">{c.action.title}</p>
+                    <p class="msg-action-detail">{c.action.detail}</p>
+                    <div class="msg-action-btns" aria-hidden="true">
+                      <span class="mock-btn mock-btn-primary pulse">Confirm</span>
+                      <span class="mock-btn">Cancel</span>
+                    </div>
+                    <p class="msg-action-wait mono">WAITING FOR YOUR OK</p>
+                  </div>
+                )}
+              </div>
+            );
+          })
+        }
+      </div>
+
+      <div class="chat-input" aria-hidden="true">
+        <span>Ask Centra AI anything</span>
+        <span class="chat-send">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5" /><path d="m5 12 7-7 7 7" /></svg>
+        </span>
+      </div>
+    </div>
+    <p class="fine chat-fine">
+      Answers from your live data · Every action waits for your approval{footnote && <sup>{footnote}</sup>}
+    </p>
+  </div>
+</div>
+
+<style>
+  .chat-demo {
+    align-items: center;
+  }
+  .chat-copy {
+    flex: 1 1 360px;
+  }
+  .chat-side {
+    flex: 1 1 500px;
+  }
+  .chat-chips {
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .chat-chip {
+    min-height: 44px;
+    padding: 10px 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--soft);
+    font: 500 15px/1.35 var(--font-sans);
+    letter-spacing: -0.01em;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  }
+  .chat-chip:hover {
+    border-color: rgba(255, 255, 255, 0.24);
+    color: var(--text);
+  }
+  .chat-chip[aria-pressed="true"] {
+    border-color: rgba(91, 108, 255, 0.6);
+    background: rgba(91, 108, 255, 0.18);
+    color: #fff;
+  }
+
+  .chat-panel {
+    border-radius: 30px;
+    background: var(--glass);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 50px 120px -50px rgba(26, 26, 255, 0.55);
+    overflow: hidden;
+  }
+  .chat-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 22px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .chat-who {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .chat-who img {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: block;
+  }
+  .chat-name {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .chat-kind {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 980px;
+    background: rgba(91, 108, 255, 0.16);
+    color: var(--accent-4);
+  }
+  .chat-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--green);
+    white-space: nowrap;
+  }
+  .chat-live .dot {
+    width: 6px;
+    height: 6px;
+  }
+  .chat-body {
+    padding: 22px;
+    min-height: 440px;
+  }
+  .chat-convo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .chat-convo[hidden] {
+    display: none;
+  }
+  .msg-me {
+    align-self: flex-end;
+    max-width: 82%;
+    padding: 12px 16px;
+    border-radius: 20px 20px 6px 20px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  .msg-ai {
+    align-self: flex-start;
+    max-width: 92%;
+    padding: 14px 16px;
+    border-radius: 20px 20px 20px 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #e6e9f5;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .msg-ai p {
+    margin: 0;
+  }
+  .msg-ai :global(strong) {
+    font-weight: 600;
+    color: #fff;
+  }
+  .msg-ai ul {
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .msg-ai li {
+    display: flex;
+    gap: 10px;
+  }
+  .msg-dot {
+    flex: none;
+    margin-top: 8px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-3);
+  }
+  .msg-dot.amber {
+    background: var(--amber);
+  }
+  .msg-dot.red {
+    background: var(--red);
+  }
+  .msg-tail {
+    margin-top: 10px !important;
+  }
+  .msg-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .msg-stats > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .msg-stats span {
+    font-size: 11px;
+    color: var(--text-3);
+  }
+  .msg-stats strong {
+    font-size: 22px;
+    letter-spacing: -0.03em;
+  }
+  .msg-action {
+    align-self: flex-start;
+    width: 100%;
+    max-width: 380px;
+    padding: 16px;
+    border-radius: 18px;
+    background: rgba(20, 22, 36, 0.9);
+    border: 1px solid rgba(91, 108, 255, 0.4);
+  }
+  .msg-action-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .msg-action-detail {
+    margin: 4px 0 0;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--text-3);
+  }
+  .msg-action-btns {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .msg-action-wait {
+    margin: 12px 0 0;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--text-4);
+  }
+  .mock-btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .mock-btn-primary {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+  }
+  .typing {
+    display: none;
+  }
+  .chat-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px 14px 22px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-4);
+    font-size: 15px;
+  }
+  .chat-input > span:first-child {
+    flex: 1;
+  }
+  .chat-send {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .chat-fine {
+    margin-top: 18px;
+    text-align: center;
+    color: var(--text-4);
+  }
+
+  /* Playback. JS adds data-armed (hide until visible) and data-play (run the sequence). */
+  .chat-panel[data-armed] .msg {
+    opacity: 0;
+  }
+  .chat-panel[data-armed][data-play] .msg {
+    animation: chat-msg 0.7s var(--ease-out) both;
+    animation-delay: var(--d, 0s);
+  }
+  .chat-panel[data-armed][data-play] .typing {
+    align-self: flex-start;
+    display: flex;
+    gap: 5px;
+    padding: 15px 16px;
+    border-radius: 20px 20px 20px 6px;
+    background: rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+    animation: chat-typing 1s ease 0.25s both;
+  }
+  .typing span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-3);
+    animation: chat-dot 1s ease-in-out infinite;
+  }
+  .typing span:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .typing span:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  @keyframes chat-msg {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+      filter: blur(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+      filter: blur(0);
+    }
+  }
+  @keyframes chat-typing {
+    0%,
+    78% {
+      opacity: 1;
+      max-height: 64px;
+    }
+    100% {
+      opacity: 0;
+      max-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      margin-top: -12px;
+    }
+  }
+  @keyframes chat-dot {
+    0%,
+    80%,
+    100% {
+      opacity: 0.3;
+      transform: translateY(0);
+    }
+    40% {
+      opacity: 1;
+      transform: translateY(-3px);
+    }
+  }
+  @media (max-width: 520px) {
+    .chat-body {
+      padding: 16px;
+      min-height: 0;
+    }
+    .msg-me,
+    .msg-ai {
+      max-width: 100%;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .chat-panel[data-armed] .msg {
+      opacity: 1;
+      animation: none !important;
+    }
+    .chat-panel[data-armed][data-play] .typing {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  for (const root of document.querySelectorAll<HTMLElement>("[data-chat]")) {
+    const panel = root.querySelector<HTMLElement>("[data-chat-panel]");
+    const kind = root.querySelector<HTMLElement>("[data-chat-kind]");
+    const picks = Array.from(root.querySelectorAll<HTMLButtonElement>("[data-chat-pick]"));
+    const convos = Array.from(root.querySelectorAll<HTMLElement>("[data-chat-convo]"));
+    if (!panel || !picks.length) continue;
+
+    const play = () => {
+      if (reduce) return;
+      panel.removeAttribute("data-play");
+      void panel.offsetWidth; // restart the CSS animations
+      panel.setAttribute("data-play", "");
+    };
+
+    if (!reduce && "IntersectionObserver" in window) {
+      panel.setAttribute("data-armed", "");
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            play();
+            io.disconnect();
+          }
+        },
+        { threshold: 0.35 },
+      );
+      io.observe(panel);
+    }
+
+    picks.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.chatPick;
+        if (btn.getAttribute("aria-pressed") === "true") return;
+        picks.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+        convos.forEach((c) => {
+          c.hidden = c.dataset.chatConvo !== id;
+          if (!c.hidden && kind) kind.textContent = c.dataset.kind || "";
+        });
+        play();
+      });
+    });
+  }
+</script>

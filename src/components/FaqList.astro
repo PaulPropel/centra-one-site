@@ -1,0 +1,32 @@
+---
+// FAQ list built on <details>, so it works without JavaScript.
+// Answers may contain simple trusted HTML (links, <strong>).
+import type { Faq } from "../data/faq";
+
+interface Props {
+  items: Faq[];
+  /** Open the first question by default. */
+  openFirst?: boolean;
+  class?: string;
+}
+const { items, openFirst = false, class: className } = Astro.props;
+---
+
+<div class:list={["faq", className]}>
+  {
+    items.map((item, i) => (
+      <details class="rv" open={openFirst && i === 0}>
+        <summary>
+          <span>{item.q}</span>
+          <span class="plus" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+              <path d="M12 5v14" />
+              <path d="M5 12h14" />
+            </svg>
+          </span>
+        </summary>
+        <div class="answer" set:html={item.a.startsWith("<") ? item.a : `<p>${item.a}</p>`} />
+      </details>
+    ))
+  }
+</div>

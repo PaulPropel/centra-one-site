@@ -1,0 +1,632 @@
+---
+// Homepage hero: a sticky WebGL stage with five chapters scrolling over it.
+// The copy is real HTML (the H1 lives here), so it reads fine without WebGL or JavaScript.
+import { SIGNUP_URL } from "../../data/site";
+
+const rail = ["Every bin", "What sells", "What's coming", "The fix", "One system"];
+---
+
+<section id="top" class="hero3d" data-hero data-chapter="0">
+  <div class="stage" data-hero-stage>
+    <div class="stage-glow" aria-hidden="true"></div>
+    <div class="grid-bg stage-fallback" aria-hidden="true"></div>
+    <canvas class="stage-canvas" data-hero-canvas aria-hidden="true"></canvas>
+    <div class="stage-scrim lg-only" aria-hidden="true"></div>
+    <div class="stage-scrim-sm sm-only" aria-hidden="true"></div>
+    <div class="stage-fade" aria-hidden="true"></div>
+
+    <div class="stage-hud mono lg-only" aria-hidden="true">
+      <span class="stage-live"><span class="live"></span>LIVE</span>
+      <span>3 WAREHOUSES</span>
+      <span>2,400 BINS</span>
+    </div>
+
+    <ol class="stage-rail lg-only" aria-hidden="true">
+      {
+        rail.map((label, i) => (
+          <li data-rail={i}>
+            <span class="rail-bar" />
+            <span class="mono rail-num">0{i + 1}</span>
+            <span>{label}</span>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="stage-hint" aria-hidden="true">
+      <span class="hint-mouse"><span class="hint-wheel"></span></span>
+      <span class="mono">SCROLL</span>
+    </div>
+  </div>
+
+  <div class="chapters">
+    <div class="chap chap-first">
+      <div class="chap-copy chap-copy-hero">
+        <p class="eyebrow in">Centra One · The AI-powered wholesale platform</p>
+        <h1 class="display hero-title in d1">Every unit.<br />Every bin.<br /><span class="shine">One system.</span></h1>
+        <p class="lead in d2 mt-32">
+          Stock, quotes, orders and purchasing for wholesalers, distributors and small manufacturers. With an AI that
+          watches all of it and gets the next step ready for you.
+        </p>
+        <div class="btn-row in d3 mt-32">
+          <a class="btn btn-primary" href={SIGNUP_URL}>Start free trial</a>
+          <a class="btn btn-secondary" href="#chapter-2">
+            See it in action
+            <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>
+          </a>
+        </div>
+        <p class="fine in d4 mt-24">30 days free · No credit card · From US$59/mo</p>
+      </div>
+    </div>
+
+    <div class="chap chap-mid" id="chapter-2">
+      <div class="chap-copy">
+        <p class="chap-kicker mono">02 / 05 · What sells</p>
+        <h2 class="h2 mt-16">It knows what sells.</h2>
+        <p class="chap-body">
+          Sales velocity for every product in every warehouse, updated as orders come in. Reorder points follow what's
+          actually moving.
+        </p>
+        <div class="chips mt-24">
+          <span class="chip">SALES VELOCITY</span>
+          <span class="chip">REORDER POINTS</span>
+          <span class="chip">ABC CYCLE COUNTS</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="chap chap-mid">
+      <div class="chap-copy">
+        <p class="chap-kicker chap-kicker-red mono">03 / 05 · What's coming</p>
+        <h2 class="h2 mt-16">It sees trouble coming.</h2>
+        <p class="chap-body">
+          BioGuard 5L runs out next Tuesday. ChemCo takes five days to deliver. Centra AI flags it today, while there's
+          still time.
+        </p>
+        <div class="card-alert glass-solid mt-24">
+          <div class="card-alert-top mono">
+            <span class="card-alert-label"><span class="live"></span>ALERT · STOCK COVER</span>
+            <span class="subtle">NOW</span>
+          </div>
+          <p class="card-alert-name">BioGuard Disinfectant 5L</p>
+          <dl class="card-alert-stats">
+            <div><dt class="mono">RUNS OUT</dt><dd>Tuesday</dd></div>
+            <div><dt class="mono">LEAD TIME</dt><dd>5 days</dd></div>
+            <div><dt class="mono">ACTION</dt><dd class="card-alert-act">Order today</dd></div>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="chap chap-mid">
+      <div class="chap-copy">
+        <p class="chap-kicker mono">04 / 05 · The fix</p>
+        <h2 class="h2 mt-16">Then it gets the fix ready.</h2>
+        <p class="chap-body">
+          Draft purchase orders, grouped by supplier, waiting for your OK. Nothing is sent until you approve it.<sup>1</sup>
+        </p>
+        <div class="card-po glass-solid mt-24">
+          <div class="card-po-top">
+            <span class="mono subtle card-po-ref">DRAFT PO · PO-2026-0087</span>
+            <span class="pill">Drafted by Centra AI</span>
+          </div>
+          <p class="card-po-supplier">ChemCo NZ</p>
+          <div class="card-po-lines">
+            <div><span>BioGuard Disinfectant 5L × 65</span><span class="mono">$1,852.50</span></div>
+            <div><span>SaniWipe Canister 200 × 24</span><span class="mono">$297.60</span></div>
+            <div class="card-po-total"><span>Total</span><span class="mono">$2,150.10</span></div>
+          </div>
+          <div class="card-po-btns" aria-hidden="true">
+            <span class="mock-btn mock-btn-primary pulse">Approve and send</span>
+            <span class="mock-btn">Edit</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chap chap-last">
+      <p class="chap-kicker mono">05 / 05 · One system</p>
+      <h2 class="display chap-last-title mt-16">Wholesale. <span class="shine">Handled.</span></h2>
+      <div class="btn-row mt-32">
+        <a class="btn btn-primary" href={SIGNUP_URL}>Start free trial</a>
+        <a class="btn btn-secondary" href="#ask">Talk to Centra AI</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero3d {
+    --stage-h: min(100vh, 960px);
+    position: relative;
+    background: var(--bg);
+  }
+  @supports (height: 100svh) {
+    .hero3d {
+      --stage-h: min(100svh, 960px);
+    }
+  }
+
+  /* ---------- Sticky stage ---------- */
+  .stage {
+    position: sticky;
+    top: 0;
+    height: var(--stage-h);
+    overflow: hidden;
+  }
+  .stage-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(55% 55% at 68% 54%, rgba(26, 26, 255, 0.24), rgba(26, 26, 255, 0) 70%),
+      radial-gradient(38% 40% at 82% 28%, rgba(167, 139, 250, 0.16), rgba(167, 139, 250, 0) 70%);
+  }
+  .stage-fallback {
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  .gl-failed .stage-fallback {
+    opacity: 1;
+  }
+  .stage-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    opacity: 0;
+    transition: opacity 1.4s ease;
+  }
+  .gl-ready .stage-canvas {
+    opacity: 1;
+  }
+  .gl-failed .stage-canvas {
+    display: none;
+  }
+  .stage-scrim {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgba(5, 6, 10, 0.88) 0%, rgba(5, 6, 10, 0.4) 36%, rgba(5, 6, 10, 0) 58%);
+    transition: opacity 0.9s ease;
+  }
+  [data-chapter="4"] .stage-scrim {
+    opacity: 0;
+  }
+  .stage-scrim-sm {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: rgba(5, 6, 10, 0.55);
+  }
+  .stage-fade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 180px;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(5, 6, 10, 0), var(--bg));
+  }
+  .stage-hud {
+    position: absolute;
+    top: 104px;
+    right: 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--text-3);
+  }
+  .stage-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--green);
+  }
+  .stage-rail {
+    position: absolute;
+    left: 32px;
+    bottom: 34px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .stage-rail li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-4);
+    transition: color 0.5s ease;
+  }
+  .rail-num {
+    font-size: 12px;
+  }
+  .rail-bar {
+    display: block;
+    width: 12px;
+    height: 2px;
+    border-radius: 2px;
+    background: #3a4158;
+    transition: width 0.5s ease, background 0.5s ease;
+  }
+  [data-chapter="0"] [data-rail="0"],
+  [data-chapter="1"] [data-rail="1"],
+  [data-chapter="2"] [data-rail="2"],
+  [data-chapter="3"] [data-rail="3"],
+  [data-chapter="4"] [data-rail="4"] {
+    color: var(--text);
+  }
+  [data-chapter="0"] [data-rail="0"] .rail-bar,
+  [data-chapter="1"] [data-rail="1"] .rail-bar,
+  [data-chapter="2"] [data-rail="2"] .rail-bar,
+  [data-chapter="3"] [data-rail="3"] .rail-bar,
+  [data-chapter="4"] [data-rail="4"] .rail-bar {
+    width: 28px;
+    background: var(--accent-3);
+  }
+  .stage-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--text-3);
+    transition: opacity 0.5s ease;
+  }
+  .hero3d:not([data-chapter="0"]) .stage-hint {
+    opacity: 0;
+  }
+  @media (min-width: 901px) {
+    /* The chapter rail runs along the bottom left, so the hint moves to the right. */
+    .stage-hint {
+      left: auto;
+      right: 32px;
+      transform: none;
+    }
+  }
+  .hint-mouse {
+    width: 24px;
+    height: 38px;
+    border-radius: 12px;
+    border: 1.5px solid rgba(244, 246, 255, 0.5);
+    display: flex;
+    justify-content: center;
+    padding-top: 7px;
+  }
+  .hint-wheel {
+    width: 3px;
+    height: 8px;
+    border-radius: 3px;
+    background: var(--text);
+    animation: hint-wheel 1.8s ease-in-out infinite;
+  }
+  @keyframes hint-wheel {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    70% {
+      transform: translateY(10px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 0;
+    }
+  }
+
+  /* ---------- Chapters (scroll over the stage) ---------- */
+  .chapters {
+    position: relative;
+    z-index: 2;
+    margin-top: calc(-1 * var(--stage-h));
+  }
+  .chap {
+    min-height: var(--stage-h);
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 96px 32px;
+    display: flex;
+    align-items: center;
+  }
+  .chap-first {
+    padding-top: 132px;
+  }
+  .chap-copy {
+    max-width: 520px;
+  }
+  .chap-copy-hero {
+    max-width: 640px;
+  }
+  .hero-title {
+    margin-top: 22px;
+  }
+  .chap-kicker {
+    margin: 0;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-3);
+  }
+  .chap-kicker-red {
+    color: var(--red-2);
+  }
+  .chap-body {
+    margin: 24px 0 0;
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+  .chap-last {
+    flex-direction: column;
+    justify-content: flex-end;
+    text-align: center;
+    max-width: none;
+    padding: 96px 24px 120px;
+  }
+  .chap-last .btn-row {
+    justify-content: center;
+  }
+  .chap-last-title {
+    font-size: clamp(48px, 7vw, 108px);
+  }
+
+  /* Alert and draft PO cards */
+  .card-alert,
+  .card-po {
+    max-width: 440px;
+    border-radius: 20px;
+  }
+  .card-alert {
+    padding: 18px 20px;
+    border-color: rgba(255, 90, 79, 0.35);
+  }
+  .card-alert-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--red-2);
+  }
+  .card-alert-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-alert-label .live {
+    color: var(--red);
+  }
+  .card-alert-name {
+    margin: 10px 0 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .card-alert-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin: 14px 0 0;
+  }
+  .card-alert-stats dt {
+    font-size: 11px;
+    color: var(--text-3);
+  }
+  .card-alert-stats dd {
+    margin: 4px 0 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .card-alert-stats .card-alert-act {
+    color: var(--amber);
+  }
+  .card-po {
+    padding: 20px;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .card-po-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .card-po-ref {
+    font-size: 11px;
+  }
+  .card-po-supplier {
+    margin: 10px 0 0;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .card-po-lines {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+  }
+  .card-po-lines > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .card-po-lines > .card-po-total {
+    padding: 4px 12px 0;
+    background: none;
+    font-weight: 700;
+  }
+  .card-po-btns {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .mock-btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .mock-btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* Scroll-driven chapter transitions where supported; otherwise chapters simply scroll. */
+  @supports (animation-timeline: view()) {
+    .chap-mid {
+      animation: chap-io linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+    .chap-first {
+      animation: chap-out linear both;
+      animation-timeline: view();
+      animation-range: cover 52% cover 92%;
+    }
+    .chap-last {
+      animation: chap-in linear both;
+      animation-timeline: view();
+      animation-range: cover 8% cover 48%;
+    }
+  }
+  @keyframes chap-io {
+    0% {
+      opacity: 0;
+      transform: translateY(70px);
+    }
+    28%,
+    72% {
+      opacity: 1;
+      transform: none;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-70px);
+    }
+  }
+  @keyframes chap-out {
+    0% {
+      opacity: 1;
+      transform: none;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-70px);
+    }
+  }
+  @keyframes chap-in {
+    0% {
+      opacity: 0;
+      transform: translateY(70px);
+    }
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .chap {
+      padding: 88px 20px;
+    }
+    .chap-first {
+      padding-top: 120px;
+    }
+    .chap-body {
+      font-size: 17px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .chap-mid,
+    .chap-first,
+    .chap-last {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    .hint-wheel {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  import { heroProgress, HERO_CHAPTERS } from "../../scripts/hero-progress";
+
+  const section = document.querySelector<HTMLElement>("[data-hero]");
+  const stage = section?.querySelector<HTMLElement>("[data-hero-stage]");
+  const canvas = section?.querySelector<HTMLCanvasElement>("[data-hero-canvas]");
+
+  if (section && stage && canvas) {
+    // Chapter tracking drives the rail, the scrim and the scroll hint. It runs even if the
+    // 3D scene never loads.
+    let chapter = 0;
+    let queued = false;
+    const update = () => {
+      queued = false;
+      const ch = Math.round(heroProgress(section, stage).p * (HERO_CHAPTERS - 1));
+      if (ch !== chapter) {
+        chapter = ch;
+        section.dataset.chapter = String(ch);
+      }
+    };
+    const schedule = () => {
+      if (!queued) {
+        queued = true;
+        requestAnimationFrame(update);
+      }
+    };
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    update();
+
+    // The scene itself is loaded after first paint so it never delays the headline.
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+    const fail = () => section.classList.add("gl-failed");
+    if (saveData) {
+      fail();
+    } else {
+      const start = () => {
+        import("../../scripts/hero3d")
+          .then(({ initHero3D }) =>
+            initHero3D({
+              section,
+              stage,
+              canvas,
+              reduce,
+              logoUrl: "/images/centra-one-logo.png",
+              onReady: () => section.classList.add("gl-ready"),
+              onFail: fail,
+            }),
+          )
+          .catch(fail);
+      };
+      if ("requestIdleCallback" in window) window.requestIdleCallback(start, { timeout: 1200 });
+      else setTimeout(start, 200);
+    }
+  }
+</script>

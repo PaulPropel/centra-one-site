@@ -1,0 +1,173 @@
+---
+interface Props {
+  /** Numbered notes, referenced in the page with <sup>1</sup>, <sup>2</sup>... */
+  footnotes?: string[];
+  /** Unnumbered fine print shown after the footnotes. */
+  notes?: string[];
+}
+const { footnotes = [], notes = [] } = Astro.props;
+const year = new Date().getFullYear();
+const columns = [
+  {
+    title: "Product",
+    links: [
+      { href: "/features", label: "Features" },
+      { href: "/ai", label: "Centra AI" },
+      { href: "/integrations", label: "Integrations" },
+      { href: "/pricing", label: "Pricing" },
+      { href: "/changelog", label: "Changelog" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { href: "/about", label: "About" },
+      { href: "/careers", label: "Careers" },
+      { href: "/contact", label: "Contact" },
+    ],
+  },
+  {
+    title: "Resources",
+    links: [
+      { href: "/help", label: "Help centre" },
+      { href: "/blog", label: "Blog" },
+      { href: "https://portal.centra-one.ai/login", label: "Sign in" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { href: "/privacy", label: "Privacy policy" },
+      { href: "/terms", label: "Terms of service" },
+    ],
+  },
+];
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="/" class="footer-logo">
+          <img src="/images/centra-one-logo.png" width="28" height="28" alt="" />
+          <span>Centra One</span>
+        </a>
+        <p>The AI-powered wholesale platform. Built in New Zealand.</p>
+      </div>
+      <nav class="footer-cols" aria-label="Footer">
+        {
+          columns.map((col) => (
+            <div class="footer-col">
+              <p class="footer-head">{col.title}</p>
+              {col.links.map((l) => (
+                <a href={l.href}>{l.label}</a>
+              ))}
+            </div>
+          ))
+        }
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      {
+        footnotes.length > 0 && (
+          <ol class="footnotes">
+            {footnotes.map((n, i) => (
+              <li id={`fn-${i + 1}`}>{n}</li>
+            ))}
+          </ol>
+        )
+      }
+      {notes.map((n) => <p>{n}</p>)}
+      <p class="copyright">Copyright © {year} Centra One Limited. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--text-3);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .footer-top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 40px;
+    padding: 56px 0 0;
+  }
+  .footer-brand {
+    flex: 1 1 260px;
+    max-width: 340px;
+  }
+  .footer-brand p {
+    margin: 14px 0 0;
+  }
+  .footer-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 16px;
+  }
+  .footer-logo img {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: block;
+  }
+  .footer-cols {
+    flex: 2 1 520px;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
+    gap: 28px;
+  }
+  .footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .footer-col a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    color: var(--soft);
+  }
+  .footer-col a:hover {
+    color: var(--text);
+  }
+  .footer-head {
+    margin: 0 0 4px;
+    font: 500 11px/1.4 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-4);
+  }
+  .footer-bottom {
+    margin-top: 40px;
+    padding: 20px 0 32px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text-4);
+  }
+  .footer-bottom p {
+    margin: 0;
+  }
+  .footer-bottom .copyright {
+    margin-top: 6px;
+  }
+  .footnotes {
+    margin: 0;
+    padding-left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+</style>
