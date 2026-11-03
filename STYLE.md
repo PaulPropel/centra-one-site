@@ -110,7 +110,7 @@ Source of the old content: `/home/claude/centra-site-content/` (`pages/<route>.m
 - **Cookies:** essential cookies only (the app's sign-in). No analytics, advertising or tracking cookies, and no cookie banner.
 - **Reply time:** "within one business day", everywhere (`REPLY_TIME`). Privacy requests: within 20 working days.
 - **Emails:** hello@centra-one.ai (general, legal, privacy), support@centra-one.ai (customers), careers@centra-one.ai (jobs). Use `EMAIL` from `data/site.ts`.
-- **Never publish demo or test logins** (for example `demo@abcsupplies.com`).
+- **Never publish demo or test logins** (email addresses or passwords for demo accounts).
 - **Counts must be true.** Don't claim numbers of articles, customers or integrations you can't count from the content.
 - Dates: today is November 2026. "Last updated" on legal pages: 3 November 2026.
 
